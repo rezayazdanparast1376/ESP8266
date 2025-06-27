@@ -1,7 +1,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp8266.h"
-
+#define _In_
+#define _Out_
+#define _InOut_
 
 #define ESP8266_PORT &huart2
 void esp8266_uart_send(uint8_t* send_buf, size_t len) {
@@ -42,6 +44,97 @@ void parser_esp8266(void) {
 
     /* [5] */
     // +RFVDD:<VDD33> 
+    // OK
+
+
+
+
+    //Respond wifi command...
+    /* [6] */
+    // +CWMODE_CUR:( value scope of <mode>) 
+    // OK
+
+    /* [7] */
+    // +CWMODE_CUR:<mode> 
+    // OK
+
+    /* [8] */
+    // +CWMODE_DEF:( value scope of <mode>) 
+    // OK
+
+    /* [9] */
+    // +CWMODE_DEF:<mode> 
+    // OK
+
+    /* [10] */
+    // +CWJAP_CUR:<ssid>, <bssid>, <channel>, <rssi> 
+    // OK
+
+    /* [11] */
+    // +CWJAP:<error code> 
+    // FAIL
+
+    /* [12] */
+    // +CWJAP_DEF:<ssid>, <bssid>, <channel>, <rssi> 
+    // OK
+
+    /* [13] */
+    // OK or ERROR
+
+    /* [14] */
+    // +CWLAP:<ecn>, <ssid>, <rssi>, <mac>, <ch>, <freq offset>, <freq calibration> 
+    // OK 
+    // ERROR
+
+    /* [15] */
+    // +CWSAP_CUR:<ssid>, <pwd>, <chl>, <ecn>, <max conn>, <ssid hidden>
+
+    /* [16] */
+    // +CWSAP_DEF:<ssid>, <pwd>, <chl>, <ecn>, <max conn>, <ssid hidden>
+
+    /* [17] */
+    // <IP addr>, <mac> 
+    // OK
+
+    /* [18] */
+    // DHCP disabled or enabled now? [????]
+
+    /* [19] */
+    // +CWDHCPS_CUR=<lease time>, <start IP>, <end IP>
+
+    /* [20] */
+    // +CWDHCPS_DEF=<lease time>, <start IP>, <end IP>
+
+    /* [21] */
+    // +CIPSTAMAC_CUR:<mac> 
+    // OK
+
+    /* [22] */
+    // +CIPSTAMAC_DEF:<mac> 
+    // OK
+
+    /* [23] */
+    // +CIPAPMAC_CUR:<mac> 
+    // OK
+
+    /* [24] */
+    // +CIPAPMAC_DEF:<mac> 
+    // OK
+
+    /* [25] */
+    // +CIPSTA_CUR:<IP> 
+    // OK
+
+    /* [26] */
+    // +CIPSTA:<IP> 
+    // OK
+
+    /* [27] */
+    // +CIPAP_CUR:<IP> 
+    // OK
+
+    /* [28] */
+    // +CIPAP_DEF:<IP> 
     // OK
 }
 
@@ -407,3 +500,499 @@ void __esp8266_Send_AT_RFVDD_req_cmd(void) {
 // AT+CWSTOPDISCOVER    Stop the mode that ESP8266 can be found by WeChat
 // AT+WPS               Set WPS function
 // AT+MDNS              Set MDNS function
+
+
+
+/**
+ *  Command AT+CWMODE_CUR=?
+ *  Response
+ * +CWMODE_CUR:( value scope of <mode>) 
+ * OK
+*/
+void __esp8266_Send_AT_CWMODE_CUR_req_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWMODE_CUR=?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+/**
+ * Command AT+CWMODE_CUR?
+ * Response
+ * +CWMODE_CUR:<mode> 
+ * OK
+*/
+void __esp8266_Send_AT_CWMODE_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWMODE_CUR?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+ 
+
+/**
+ * Command AT+CWMODE_CUR=<mode>
+ * Response OK
+*/
+void __esp8266_Send_AT_CWMODE_CUR_set_cmd(uint8_t mode) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWMODE_CUR=%d%c", mode, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+/**
+ * Command AT+CWMODE_DEF=?
+ * Response
+ * +CWMODE_DEF:( value scope of <mode>) 
+ * OK
+*/
+void __esp8266_Send_AT_CWMODE_DEF_req_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWMODE_DEF=?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+/**
+ * Command AT+CWMODE_DEF?
+ * Response
+ * +CWMODE_DEF:<mode> 
+ * OK
+*/
+void __esp8266_Send_AT_CWMODE_DEF_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWMODE_DEF?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+/**
+ * Command AT+CWMODE_DEF=<mode>
+ * Response OK
+*/
+void __esp8266_Send_AT_CWMODE_DEF_set_cmd(uint8_t mode) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWMODE_DEF?%d%c", mode, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+/**
+ * Command AT+CWJAP_CUR?
+ * Response
+ * +CWJAP_CUR:<ssid>, <bssid>, <channel>, <rssi> 
+ * OK
+*/
+void __esp8266_Send_AT_CWJAP_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWJAP_CUR?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+// Command AT+CWJAP_CUR=<ssid>, <pwd>[, <bssid>]
+// Response
+// OK 
+// or 
+// +CWJAP:<error code> 
+// FAIL
+void __esp8266_Send_AT_CWJAP_CUR_get_cmd(
+    char* ssid, 
+    char* pwd, 
+    char* bssid
+) {
+    uint8_t send_buf[35] = {0};
+
+    if (bssid == NULL) {
+        sprintf((char*)send_buf, "AT+CWJAP_CUR=%s, %s%c", ssid, pwd, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWJAP_CUR=%s, %s, %s%c", ssid, pwd, bssid, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWJAP_DEF?
+// Response
+// +CWJAP_DEF:<ssid>, <bssid>, <channel>, <rssi> 
+// OK
+void __esp8266_Send_AT_CWJAP_DEF_get_cmd() {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWJAP_DEF?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWJAP_DEF=<ssid>, <pwd>[, <bssid>]
+// Response
+// OK 
+// or 
+// +CWJAP:<error code> 
+// FAIL
+void __esp8266_Send_AT_CWJAP_DEF_set_cmd(
+    char* ssid, 
+    char* pwd, 
+    char* bssid
+) {
+    uint8_t send_buf[15] = {0};
+
+    if (bssid == NULL) {
+        sprintf((char*)send_buf, "AT+CWJAP_DEF=%s, %s%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWJAP_DEF=%s, %s, %s%c", CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+
+
+//  Command AT+CWLAPOPT=<sort_enable>, <mask>
+//  Response OK or ERROR
+void __esp8266_Send_AT_CWLAPOPT_set_cmd(bool sort_enable, uint8_t mask) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWLAPOPT=%d, %d%c", sort_enable, mask, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+
+// Command AT+CWLAP=<ssid>[, <mac>, <ch>]
+// Response
+// +CWLAP:<ecn>, <ssid>, <rssi>, <mac>, <ch>, <freq offset>, <freq calibration> 
+// OK 
+// ERROR
+void __esp8266_Send_AT_CWLAP_set_cmd(char* ssid, char* mac, char* ch) {
+    uint8_t send_buf[35] = {0};
+
+    if (mac == NULL && ch == NULL) {
+        sprintf((char*)send_buf, "AT+CWLAP=%s%c", ssid, CARRIAR_RETURN);
+    }
+    else if (mac != NULL && ch == NULL) {
+        sprintf((char*)send_buf, "AT+CWLAP=%s, %s%c", ssid, mac, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWLAP=%s, %s, %d%c", ssid, mac, ch, CARRIAR_RETURN);
+    } 
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+// Command AT+CWLAP
+// Response
+// +CWLAP:<ecn>, <ssid>, <rssi>, <mac>, <ch>, <freq offset>, <freq calibration> 
+// OK 
+// ERROR
+void __esp8266_Send_AT_CWLAP_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWLAP%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+
+// Command AT+CWQAP
+void __esp8266_Send_AT_CWQAP_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWQAP%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+//  Command AT+CWSAP_CUR?
+//  Response +CWSAP_CUR:<ssid>, <pwd>, <chl>, <ecn>, <max conn>, <ssid hidden>
+void __esp8266_Send_AT_CWSAP_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWSAP_CUR?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+// Command AT+CWSAP_CUR=<ssid>, <pwd>, <chl>, <ecn>[, <max conn>][, <ssid hidden>]
+// Response OK 
+// ERROR
+void __esp8266_Send_AT_CWSAP_CUR_set_cmd(
+    _In_ char*    ssid, 
+    _In_ char*    pwd, 
+    _In_ uint8_t  chl, 
+    _In_ uint8_t  ecn, 
+    _In_ uint8_t* max_conn, 
+    _In_ uint8_t* ssid_hidden
+) {
+    uint8_t send_buf[15] = {0};
+
+    if (max_conn == NULL || ssid_hidden == NULL) {
+        sprintf((char*)send_buf, "AT+CWSAP_CUR=%s, %s, %d, %d%c", ssid, pwd, chl, ecn, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWSAP_CUR=%s, %s, %d, %d, %d, %d%c", ssid, pwd, chl, ecn, max_conn, ssid_hidden, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+
+// Command AT+CWSAP_DEF?
+// Response +CWSAP_DEF:<ssid>, <pwd>, <chl>, <ecn>, <max conn>, <ssid hidden>
+void __esp8266_Send_AT_CWSAP_DEF_get_cmd() {
+    uint8_t send_buf[15] = {0};
+    
+    sprintf((char*)send_buf, "AT+CWSAP_DEF?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+// Command AT+CWSAP_DEF=<ssid>, <pwd>, <chl>, <ecn>[, <max conn>][, <ssid hidden>]
+// Response OK 
+// ERROR
+void __esp8266_Send_AT_CWSAP_DEF_set_cmd(
+    _In_ char*   ssid, 
+    _In_ char*   pwd, 
+    _In_ uint8_t chl, 
+    _In_ uint8_t ecn, 
+    _In_ char*   max_conn, 
+    _In_ char*   ssid_hidden
+) {
+    uint8_t send_buf[15] = {0};
+    
+    if (max_conn != NULL && ssid_hidden != NULL) {
+        sprintf((char*)send_buf, "AT+CWSAP_DEF=%s, %s, %d, %d, %s, %s%c", ssid, pwd, chl, ecn, max_conn, ssid_hidden, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWSAP_DEF=%s, %s, %d, %d%c", ssid, pwd, chl, ecn, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+/**
+ * @brief This command is used to get the IP of stations that are connected to ESP8266 softAP.
+ * AT+CWLIF– IP of stations which are connected to ESP8266 softAP
+ * 
+ * @param   IPaddr  IP address of stations which are connected to ESP8266 softAP  
+ * @param   mac     MAC address of stations which are connected to ESP8266 softAP
+ * 
+ * @note This command can not get static IP, it is only available if DHCP is enabled.
+ * 
+ *  Response
+ *  <IP addr>, <mac>
+ *  OK
+*/
+void __esp8266_Send_AT_CWLIF_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWLIF%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+ 
+ 
+ 
+/**
+ * @brief
+ * 
+ * @note  
+ * • This configuration will NOT store in Flash user parameter area. 
+ * • This configuration interact with static IP related AT commands(AT+CIPSTA related and AT+CIPAP related): 
+ *      ‣ If enable DHCP, static IP will be disabled; 
+ *      ‣ If enable static IP, DHCP will be disabled; 
+ *      ‣ This will depends on the last configuration.
+ * 
+ * 
+*/  
+void __esp8266_Send_AT_CWDHCP_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWDHCP_CUR?%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+} 
+ 
+
+// Command AT+CWDHCP_CUR=<mode>, <en>
+// Response OK
+void __esp8266_Send_AT_CWDHCP_CUR_set_cmd(uint8_t mode, bool en) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWDHCP_CUR=%d, %d%c",mode, en, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWDHCP_DEF?
+// Response DHCP disabled or enabled now?
+void __esp8266_Send_AT_CWDHCP_DEF_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWDHCP_DEF?%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+// Command AT+CWDHCP_DEF=<mode>, <en>
+// Response OK
+void __esp8266_Send_AT_CWDHCP_DEF_set_cmd(uint8_t mode, bool en) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWDHCP_DEF=%d, %d%c",mode, en, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+
+// Command AT+CWDHCPS_CUR?
+// Response +CWDHCPS_CUR=<lease time>, <start IP>, <end IP>
+void __esp8266_Send_AT_CWDHCPS_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWDHCPS_CUR?%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWDHCPS_CUR=<enable>, <lease time>, <start IP>, <end IP>
+// Response OK
+/**
+ * @param[in] enable 
+ *          0 : Disable the settings and use the default IP range. 
+ *          1: Enable setting the IP range, parameters below have to be set.
+ * @param[in] lease_time    the unit of lease time is minute, range [1, 2880] 
+ * @param[in] startIP       start IP of the IP range that can be got from ESP8266 soft-AP DHCP server 
+ * @param[in] endIP         end IP of the IP range that can be got from ESP8266 soft-AP DHCP server
+*/
+void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, uint16_t lease_time, char* startIP, char* endIP) {
+    uint8_t send_buf[15] = {0};
+
+    if (enable == true) {
+        sprintf((char*)send_buf, "AT+CWDHCPS_CUR=%d, %d, %s, %s%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWDHCPS_CUR=0%c", CARRIAR_RETURN);
+    }
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+
+// Command AT+CWDHCPS_DEF?
+// Response +CWDHCPS_DEF=<lease time>, <start IP>, <end IP>
+void __esp8266_Send_AT_CWDHCPS_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWDHCPS_DEF?%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+// Command AT+CWDHCPS_DEF=<enable>, <lease time>, <start IP>, <end IP>
+// Response OK
+void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, uint16_t lease_time, char* startIP, char* endIP) {
+    uint8_t send_buf[15] = {0};
+
+    if (enable == true) {
+        sprintf((char*)send_buf, "AT+CWDHCPS_DEF=%d, %d, %s, %s%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CWDHCPS_DEF=0%c", CARRIAR_RETURN);
+    }
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+// =================================================== TCP/IP ====================================================
+// AT+CIPSTATUS     Get connection status
+// AT+CIPDOMAIN     DNS function
+// AT+CIPSTART      Establish TCP connection, UDP transmission or SSL connection 
+// AT+CIPSSLSIZE    Set the size of SSL buffer
+// AT+CIPSEND       Send data
+// AT+CIPSENDEX     Send data, if <length> or "\0" is met, data will be sent
+// AT+CIPSENDBUF    Write data into TCP-send-buffer
+// AT+CIPBUFRESET   Reset segment ID count
+// AT+CIPBUFSTATUS  Check status of TCP-send-buffer
+// AT+CIPCHECKSEQ   Check if a specific segment is sent or not
+// AT+CIPCLOSE      Close TCP/UDP/SSL connection 
+// AT+CIFSR         Get local IP address 
+// AT+CIPMUX        Set multiple connections mode
+// AT+CIPSERVER     Configure as server
+// AT+CIPMODE       Set transmission mode
+// AT+SAVETRANSLINK Save transparent transmission link to Flash
+// AT+CIPSTO        Set timeout when ESP8266 runs as TCP server
+// AT+CIUPDATE      Upgrade firmware through network
+// AT+PING          Function PING 
+// AT+CIPDINFO      Show remote IP and remote port with "+IPD"
