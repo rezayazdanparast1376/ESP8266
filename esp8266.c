@@ -934,7 +934,7 @@ void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, uint16_t lease_time, cha
     uint8_t send_buf[15] = {0};
 
     if (enable == true) {
-        sprintf((char*)send_buf, "AT+CWDHCPS_CUR=%d, %d, %s, %s%c", CARRIAR_RETURN);
+        sprintf((char*)send_buf, "AT+CWDHCPS_CUR=%d, %d, %s, %s%c", enable, lease_time, startIP, endIP, CARRIAR_RETURN);
     }
     else {
         sprintf((char*)send_buf, "AT+CWDHCPS_CUR=0%c", CARRIAR_RETURN);
@@ -946,10 +946,9 @@ void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, uint16_t lease_time, cha
 
 
 
-
 // Command AT+CWDHCPS_DEF?
 // Response +CWDHCPS_DEF=<lease time>, <start IP>, <end IP>
-void __esp8266_Send_AT_CWDHCPS_CUR_get_cmd(void) {
+void __esp8266_Send_AT_CWDHCPS_DEF_get_cmd(void) {
     uint8_t send_buf[15] = {0};
 
     sprintf((char*)send_buf, "AT+CWDHCPS_DEF?%c", CARRIAR_RETURN);
@@ -958,13 +957,15 @@ void __esp8266_Send_AT_CWDHCPS_CUR_get_cmd(void) {
 }
 
 
+
+
 // Command AT+CWDHCPS_DEF=<enable>, <lease time>, <start IP>, <end IP>
 // Response OK
-void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, uint16_t lease_time, char* startIP, char* endIP) {
+void __esp8266_Send_AT_CWDHCPS_DEF_set_cmd(bool enable, uint16_t lease_time, char* startIP, char* endIP) {
     uint8_t send_buf[15] = {0};
 
     if (enable == true) {
-        sprintf((char*)send_buf, "AT+CWDHCPS_DEF=%d, %d, %s, %s%c", CARRIAR_RETURN);
+        sprintf((char*)send_buf, "AT+CWDHCPS_DEF=%d, %d, %s, %s%c", enable, lease_time, startIP, endIP, CARRIAR_RETURN);
     }
     else {
         sprintf((char*)send_buf, "AT+CWDHCPS_DEF=0%c", CARRIAR_RETURN);
@@ -972,6 +973,382 @@ void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, uint16_t lease_time, cha
     
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
+
+
+
+
+// Command AT+CWAUTOCONN=<enable>
+// Response OK
+void __esp8266_Send_AT_CWAUTOCONN_set_cmd(bool enable) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWAUTOCONN=%d%c", enable, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTAMAC_CUR?
+// Response
+// +CIPSTAMAC_CUR:<mac> 
+// OK
+void __esp8266_Send_AT_CIPSTAMAC_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPSTAMAC_CUR?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTAMAC_CUR=<mac>
+// Response OK
+void __esp8266_Send_AT_CIPSTAMAC_CUR_set_cmd(char* mac) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPSTAMAC_CUR=%s%c", mac, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTAMAC_DEF?
+// Response
+// +CIPSTAMAC_DEF:<mac> 
+// OK
+void __esp8266_Send_AT_CIPSTAMAC_DEF_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPSTAMAC_DEF?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTAMAC_DEF=<mac>
+// Response OK
+void __esp8266_Send_AT_CIPSTAMAC_DEF_set_cmd(char* mac) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPSTAMAC_DEF=%s%c", mac, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAPMAC_CUR?
+// Response
+// +CIPAPMAC_CUR:<mac> 
+// OK
+void __esp8266_Send_AT_CIPAPMAC_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPAPMAC_CUR?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAPMAC_CUR=<mac>
+// Response OK
+void __esp8266_Send_AT_CIPAPMAC_CUR_set_cmd(char* mac) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPAPMAC_CUR=%s%c", mac, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAPMAC_DEF?
+// Response
+// +CIPAPMAC_DEF:<mac> 
+// OK
+void __esp8266_Send_AT_CIPAPMAC_DEF_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPAPMAC_DEF?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAPMAC_DEF=<mac>
+// Response
+// OK
+void __esp8266_Send_AT_CIPAPMAC_DEF_set_cmd(char* mac) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPAPMAC_DEF=%s%c", mac, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTA_CUR?
+// Response
+// +CIPSTA_CUR:<IP> 
+// OK
+void __esp8266_Send_AT_CIPSTA_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPSTA_CUR?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTA_CUR=<IP>[, <gateway>, <netmask>]
+// Response OK
+void __esp8266_Send_AT_CIPSTA_CUR_set_cmd(
+    _In_ char* IP, 
+    _In_ char* gateway, 
+    _In_ char* netmask
+) {
+    uint8_t send_buf[15] = {0};
+
+    if (gateway != NULL && netmask != NULL) {
+        sprintf((char*)send_buf, "AT+CIPSTA_CUR=%s, %s, %s%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CIPSTA_CUR=%s%c", CARRIAR_RETURN);      
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTA_DEF?
+// Response
+// +CIPSTA:<IP> 
+// OK
+void __esp8266_Send_AT_CIPSTA_DEF_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPSTA_DEF?%c", CARRIAR_RETURN);      
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPSTA_DEF=<IP>[, <gateway>, <netmask>]
+// Response OK
+void __esp8266_Send_AT_CIPSTA_DEF_set_cmd(
+    _In_ char* IP, 
+    _In_ char* gateway, 
+    _In_ char* netmask
+) {
+    uint8_t send_buf[15] = {0};
+
+    if (gateway != NULL && netmask != NULL) {
+        sprintf((char*)send_buf, "AT+CIPSTA_DEF=%s, %s, %s%c", IP, gateway, netmask, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CIPSTA_DEF=%s%c", IP, CARRIAR_RETURN);      
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAP_CUR?
+// Response
+// +CIPAP_CUR:<IP> 
+// OK
+void __esp8266_Send_AT_CIPAP_CUR_get_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPAP_CUR?%c", CARRIAR_RETURN);      
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAP_CUR=<IP>[, <gateway>, <netmask>]
+// Response OK
+void __esp8266_Send_AT_CIPAP_CUR_set_cmd(
+    _In_ char* IP, 
+    _In_ char* gateway, 
+    _In_ char* netmask
+) {
+    uint8_t send_buf[15] = {0};
+
+    if (gateway != NULL && netmask != NULL) {
+        sprintf((char*)send_buf, "AT+CIPAP_CUR=%s, %s, %s%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CIPAP_CUR=%s%c", CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAP_DEF?
+// Response
+// +CIPAP_DEF:<IP> 
+// OK
+void __esp8266_Send_AT_CIPAP_DEF_get_cmd() {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CIPAP_DEF?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CIPAP_DEF=<IP>[, <gateway>, <netmask>]
+// Response OK
+void __esp8266_Send_AT_CIPAP_CUR_set_cmd(
+    _In_ char* IP, 
+    _In_ char* gateway, 
+    _In_ char* netmask
+) {
+    uint8_t send_buf[15] = {0};
+    
+    if (gateway != NULL && netmask != NULL) {
+        sprintf((char*)send_buf, "AT+CIPAP_CUR=%s, %s, %s%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((char*)send_buf, "AT+CIPAP_CUR=%s%c", CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWSTARTSMART 
+// Response OK or ERROR
+void __esp8266_Send_AT_CWSTARTSMART_cmd() {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWSTARTSMART%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWSTARTSMART=<type>
+// Response OK or ERROR
+void __esp8266_Send_AT_CWSTARTSMART_set_cmd(uint8_t type) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWSTARTSMART=%d%c", type, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWSTOPSMART
+//  Response OK or ERROR
+void __esp8266_Send_AT_CWSTOPSMART_cmd(void) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWSTOPSMART%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWSTARTDISCOVER=<WeChat number>, <dev_type>, <time>
+// Response OK or ERROR
+void __esp8266_Send_AT_CWSTOPSMART_set_cmd(
+    _In_ char*    WeChat_number, 
+    _In_ char*    dev_type, 
+    _In_ uint32_t time
+) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWSTARTDISCOVER=%s, %s, %d%c", WeChat_number, dev_type, time, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+CWSTOPDISCOVER
+// Response OK or ERROR
+void __esp8266_Send_AT_CWSTOPDISCOVER_cmd() {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+CWSTOPDISCOVER%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+WPS=<enable>
+// Response OK or ERROR
+void __esp8266_Send_AT_WPS_cmd(bool enable) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+WPS=%d%c", enable, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+// Command AT+MDNS=<enable>, <hostname>, <server_name>, <server_port>
+// Response OK or ERROR
+void __esp8266_Send_AT_MDNS_cmd(
+    _In_ bool     enable, 
+    _In_ char*    hostname, 
+    _In_ char*    server_name, 
+    _In_ uint16_t server_port
+) {
+    uint8_t send_buf[15] = {0};
+
+    sprintf((char*)send_buf, "AT+WPS=%d, %s, %s, %d%c", enable, hostname, server_name, server_port, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
 
 
 
