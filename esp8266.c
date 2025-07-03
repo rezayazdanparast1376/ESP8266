@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "esp8266.h"
 #include "../Common_C/defs.h"
+#include "../Common_C/debug.h"
 
 
 #define ESP8266_PORT &huart2
@@ -227,7 +228,7 @@ Void __esp8266_Send_AT_GSLP_cmd(UInt16 time) {
  * 
 */
 Void __esp8266_Send_ATE_cmd(
-    bool echo
+    Bool echo
 ) {
     UInt8 send_buf[15] = {0};
     
@@ -684,7 +685,7 @@ Void __esp8266_Send_AT_CWJAP_DEF_set_cmd(
 
 //  Command AT+CWLAPOPT=<sort_enable>, <mask>
 //  Response OK or ERROR
-Void __esp8266_Send_AT_CWLAPOPT_set_cmd(bool sort_enable, UInt8 mask) {
+Void __esp8266_Send_AT_CWLAPOPT_set_cmd(Bool sort_enable, UInt8 mask) {
     UInt8 send_buf[15] = {0};
 
     sprintf((Char*)send_buf, "AT+CWLAPOPT=%d, %d%c", sort_enable, mask, CARRIAR_RETURN);
@@ -871,7 +872,7 @@ Void __esp8266_Send_AT_CWDHCP_CUR_get_cmd(Void) {
 
 // Command AT+CWDHCP_CUR=<mode>, <en>
 // Response OK
-Void __esp8266_Send_AT_CWDHCP_CUR_set_cmd(UInt8 mode, bool en) {
+Void __esp8266_Send_AT_CWDHCP_CUR_set_cmd(UInt8 mode, Bool en) {
     UInt8 send_buf[15] = {0};
 
     sprintf((Char*)send_buf, "AT+CWDHCP_CUR=%d, %d%c",mode, en, CARRIAR_RETURN);
@@ -896,7 +897,7 @@ Void __esp8266_Send_AT_CWDHCP_DEF_get_cmd(Void) {
 
 // Command AT+CWDHCP_DEF=<mode>, <en>
 // Response OK
-Void __esp8266_Send_AT_CWDHCP_DEF_set_cmd(UInt8 mode, bool en) {
+Void __esp8266_Send_AT_CWDHCP_DEF_set_cmd(UInt8 mode, Bool en) {
     UInt8 send_buf[15] = {0};
 
     sprintf((Char*)send_buf, "AT+CWDHCP_DEF=%d, %d%c",mode, en, CARRIAR_RETURN);
@@ -931,7 +932,7 @@ Void __esp8266_Send_AT_CWDHCPS_CUR_get_cmd(Void) {
  * @param[in] startIP       start IP of the IP range that can be got from ESP8266 soft-AP DHCP server 
  * @param[in] endIP         end IP of the IP range that can be got from ESP8266 soft-AP DHCP server
 */
-Void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(bool enable, UInt16 lease_time, Char* startIP, Char* endIP) {
+Void __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(Bool enable, UInt16 lease_time, Char* startIP, Char* endIP) {
     UInt8 send_buf[15] = {0};
 
     if (enable == true) {
@@ -962,7 +963,7 @@ Void __esp8266_Send_AT_CWDHCPS_DEF_get_cmd(Void) {
 
 // Command AT+CWDHCPS_DEF=<enable>, <lease time>, <start IP>, <end IP>
 // Response OK
-Void __esp8266_Send_AT_CWDHCPS_DEF_set_cmd(bool enable, UInt16 lease_time, Char* startIP, Char* endIP) {
+Void __esp8266_Send_AT_CWDHCPS_DEF_set_cmd(Bool enable, UInt16 lease_time, Char* startIP, Char* endIP) {
     UInt8 send_buf[15] = {0};
 
     if (enable == true) {
@@ -980,7 +981,7 @@ Void __esp8266_Send_AT_CWDHCPS_DEF_set_cmd(bool enable, UInt16 lease_time, Char*
 
 // Command AT+CWAUTOCONN=<enable>
 // Response OK
-Void __esp8266_Send_AT_CWAUTOCONN_set_cmd(bool enable) {
+Void __esp8266_Send_AT_CWAUTOCONN_set_cmd(Bool enable) {
     UInt8 send_buf[15] = {0};
 
     sprintf((Char*)send_buf, "AT+CWAUTOCONN=%d%c", enable, CARRIAR_RETURN);
@@ -1323,7 +1324,7 @@ Void __esp8266_Send_AT_CWSTOPDISCOVER_cmd() {
 
 // Command AT+WPS=<enable>
 // Response OK or ERROR
-Void __esp8266_Send_AT_WPS_cmd(bool enable) {
+Void __esp8266_Send_AT_WPS_cmd(Bool enable) {
     UInt8 send_buf[15] = {0};
 
     sprintf((Char*)send_buf, "AT+WPS=%d%c", enable, CARRIAR_RETURN);
@@ -1337,7 +1338,7 @@ Void __esp8266_Send_AT_WPS_cmd(bool enable) {
 // Command AT+MDNS=<enable>, <hostname>, <server_name>, <server_port>
 // Response OK or ERROR
 Void __esp8266_Send_AT_MDNS_cmd(
-    _In_ bool     enable, 
+    _In_ Bool     enable, 
     _In_ Char*    hostname, 
     _In_ Char*    server_name, 
     _In_ UInt16 server_port
@@ -1384,7 +1385,11 @@ Void __esp8266_Send_AT_MDNS_cmd(
 // +CIPSTATUS:<link ID>, <type>, <remote_IP>, <remote_port>, <local_port>, 
 // <tetype>
 Void __esp8266_Send_AT_CIPSTATUS_cmd(Void) {
+    UInt8 send_buf[15] = {0};
 
+    sprintf((Char*)send_buf, "AT+CIPSTATUS%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
 }
 
 
@@ -1393,12 +1398,17 @@ Void __esp8266_Send_AT_CIPSTATUS_cmd(Void) {
 // Command AT+CIPDOMAIN=<domain name>
 // Response +CIPDOMAIN:<IP address>
 Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
+    UInt8 send_buf[15] = {0};
 
+    sprintf((Char*)send_buf, "AT+CIPDOMAIN=%s%c", domain_name, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
 }
 
 
 
-
+Bool single_connection = true;
+Bool Multiple_connection = true;
 // Single connection 
 // (AT+CIPMUX=0)
 // AT+CIPSTART=  <type>, <remote IP>, <remote port>[, <TCP keep alive>]
@@ -1410,8 +1420,18 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // OK or ERROR 
 // If TCP is connected already, returns 
 // ALREADY CONNECT
+Void __esp8266_Send_AT_CIPSTART_TCP_cmd(linkID, type, remoteIP, remote_port, TCP_keep_alive) {
+    UInt8 send_buf[15] = {0};
 
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%s%c", type, remoteIP, remote_port, TCP_keep_alive, CARRIAR_RETURN);
+    }
+    if (Multiple_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%s%c", linkID, type, remoteIP, remote_port, TCP_keep_alive, CARRIAR_RETURN);
+    }
 
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
@@ -1427,7 +1447,18 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // OK or ERROR 
 // If connection already exists, returns 
 // ALREADY CONNECT
+Void __esp8266_Send_AT_CIPSTART_UDP_cmd(linkID, type, remoteIP, remote_port, UDPlocal_port, UDP_mode) {
+    UInt8 send_buf[15] = {0};
 
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%s%c", type, remoteIP, remote_port, UDPlocal_port, UDP_mode, CARRIAR_RETURN);
+    }
+    if (Multiple_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%c", linkID, type, remoteIP, remote_port, UDPlocal_port, UDP_mode, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
@@ -1444,12 +1475,18 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // OK or ERROR 
 // If TCP is connected already, returns 
 // ALREADY CONNECT
+Void __esp8266_Send_AT_CIPSTART_SSL_cmd(linkID, type, remoteIP, remote_port, TCP_keep_alive) {
+    UInt8 send_buf[15] = {0};
 
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%s%c", type, remoteIP, remote_port, TCP_keep_alive, CARRIAR_RETURN);
+    }
+    if (Multiple_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%c", linkID, type, remoteIP, remote_port, TCP_keep_alive, CARRIAR_RETURN);
+    }
 
-
-
-
-
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
@@ -1458,6 +1495,22 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // AT+CIPSSLSIZE=<size>
 // Response
 // OK or ERROR
+/**
+ * @brief Set the size of SSL buffer 
+ * 
+ * @param[in]  size   The size of SSL buffer, range: 2048 ~ 4096
+*/
+Void __esp8266_Send_AT_CIPSSLSIZE_cmd(
+    _In_ UInt16 size
+) {
+    Soft_Assert_Void(size >= 2048 && size <= 4096, "Invalid parameter! size parameter must be in range: 2048 ~ 4096");
+
+    UInt8 send_buf[15] = {0};
+
+    sprintf((Char*)send_buf, "AT+CIPSSLSIZE=%s%c", size, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
@@ -1466,20 +1519,90 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // Single connection (+CIPMUX=0) 
 // AT+CIPSEND=<length>
 
-
-
-
 // Multiple connection (+CIPMUX=1) 
 // AT+CIPSEND=<link ID>, <length>
+Void __esp8266_Send_AT_CIPSSLSIZE_cmd(
+    _In_ UInt8  linkID, 
+    _In_ UInt16 length
+) {
+    Soft_Assert_Void(linkID <= 4, "Invalid linkID!");
+    Soft_Assert_Void(length <= 2048, "Invalind parameter!");
+
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSEND=%d%c", length, CARRIAR_RETURN);
+    }
+    if (Multiple_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSTART=%d, %d%c", linkID, length, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 // UDP Transmission AT+CIPSEND=[<link ID>, ]<length>[, <remote IP>, <remote port>]
+/**
+ * @brief Send data
+ * 
+ * @param[in] linkID      ID of the connection (0~4), for multi-connect 
+ * @param[in] length      data length, MAX 2048 bytes  
+ * @param[in] remoteIP    UDP transmission can set remote IP when send data 
+ * @param[in] remote_port UDP transmission can set remote port when send data
+*/
+Void __esp8266_Send_AT_CIPSSLSIZE_UDP_cmd(
+    _In_ UInt8  linkID, 
+    _In_ UInt16 length,
+    _In_ Char*  remoteIP, 
+    _In_ UInt16 remote_port
+) {
+    Soft_Assert_Void(linkID <= 4, "Invalid linkID!");
+    Soft_Assert_Void(length <= 2048, "Invalind parameter!");
 
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        if (remoteIP != NULL) {
+            sprintf((Char*)send_buf, "AT+CIPSEND=%d, %s, %d%c", length, remoteIP, remote_port, CARRIAR_RETURN);
+        }
+        else {
+            sprintf((Char*)send_buf, "AT+CIPSEND=%d%c", length, CARRIAR_RETURN);
+        }
+    }
+    if (Multiple_connection == 1) {
+        if (remoteIP != NULL) {
+            sprintf((Char*)send_buf, "AT+CIPSTART=%d, %d, %s, %d%c", linkID, length, remoteIP, remote_port, CARRIAR_RETURN);
+        }
+        else {
+            sprintf((Char*)send_buf, "AT+CIPSTART=%d, %d%c", linkID, length, CARRIAR_RETURN);
+        }
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 // Command AT+CIPSEND
+/**
+ * @brief Send data
+ * 
+ * @attention  Wrap return ">" after execute command. Enters unvarnished transmission, 20ms interval between each packet, maximum 2048 bytes per packet. 
+ * When single packet containing "+++" is received, it returns to normal command mode. Please wait at least 1 second before sending next AT command. 
+ * @note
+ * This command can only be used in transparent transmission mode which require to be single connection mode.  
+ * For UDP transparent transmission, <UDP mode> has to be 0 in command "AT+CIPSTART"
+*/
+Void __esp8266_Send_AT_CIPSSLSIZE_TT_MODE_cmd(Void) {
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSEND%c", CARRIAR_RETURN);
+    }    
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
@@ -1487,58 +1610,198 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // Single connection (+CIPMUX=0) 
 // AT+CIPSENDEX=<length>
 
-
-
 // Multiple connection (+CIPMUX=1) 
 // AT+CIPSENDEX=<link ID>, <length>
+
+/**
+ * @param[in] linkID ID of the connection (0~4), for multi-connect 
+ * @param[in] length data length, MAX 2048 bytes
+*/
+Void __esp8266_Send_AT_CIPSENDEX_cmd(
+    _In_ UInt8  linkID, 
+    _In_ UInt16 length
+) {
+    Soft_Assert_Void(linkID <= 4, "Invalid linkID!");
+    Soft_Assert_Void(length <= 2048, "Invalind parameter!");
+
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSEND=%d%c", length, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPSEND=%d, %d%c", linkID, length, CARRIAR_RETURN);
+    }
+    
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
 // UDP Transmission AT+CIPSENDEX=[<link ID>, ]<length>[, <remote IP>, <remote port>]
+Void __esp8266_Send_AT_CIPSENDEX_UDP_cmd(
+    _In_ UInt8  linkID, 
+    _In_ UInt16 length,
+    _In_ Char*  remoteIP, 
+    _In_ UInt16 remote_port
+) {
+    Soft_Assert_Void(linkID <= 4, "Invalid linkID!");
+    Soft_Assert_Void(length <= 2048, "Invalind parameter!");
+
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        if (remoteIP != NULL) {
+            sprintf((Char*)send_buf, "AT+CIPSEND=%d, %s, %d%c", length, remoteIP, remote_port, CARRIAR_RETURN);       
+        }
+        else {
+            sprintf((Char*)send_buf, "AT+CIPSEND=%d%c", length, CARRIAR_RETURN);
+        }
+    }
+    else {
+        if (remoteIP != NULL) {
+            sprintf((Char*)send_buf, "AT+CIPSEND=%d, %d, %s%d%c", linkID, length, remoteIP, remote_port, CARRIAR_RETURN);
+        }
+        else {
+            sprintf((Char*)send_buf, "AT+CIPSEND=%d, %d%c", linkID, length, CARRIAR_RETURN);
+        }
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+/**
+ * @brief Write data into TCP-send-buffer
+ * 
+ * @attention This command only write data into TCP-send-buffer, so it can be called continually, needn’t wait for "SEND OK";  
+ * if a TCP segment is sent successfully, it will return <segment ID>, SEND OK. 
+ * Before data <length> is met, input "+++" can switch back from data mode to command mode, and discard the 
+ * data received before, cancel the "AT+CIPSENDBUF". This command can NOT be used on SSL connection.
+ * 
+ * @param[in] linkID    ID of the connection (0~4), for multi-connect 
+ * @param[in] length    data length, data more than <length> will be discarded, MAX 2048 bytes
+ * 
+ * @param[out] segmentID uint32, starts from 1, add 1 every time be called;
+ * 
+ * @note 
+ * <current segment ID>, <segment ID of which sent successfully> 
+ * OK 
+ * > 
+ * 
+ * Wrap return ">" begins receiving of serial data, when data <length> is met, send it; data more than <length> will be discarded, and returns "busy" 
+ * 
+ * If connection cannot be established, or it’s not a TCP connection , or buffer full, or some other error occurred, returns ERROR 
+ * 
+ * If data is transmitted successfully,  
+ * (1) for single connection, returns <segment ID>, SEND OK 
+ * (2) for multiple connection, returns <link ID>, <segment ID>, SEND OK
+*/
+Void __esp8266_Send_AT_CIPSENDBUF_cmd(
+    _In_ UInt8  linkID, 
+    _In_ UInt16 length
+) {
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPSENDBUF=%d%c", length, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPSENDBUF=%d, %d%c", linkID, length, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
 
-// Single connection (+CIPMUX=0) 
-// AT+CIPSENDBUF=<length>
+/**
+ * @brief Check status of TCP-send-buffer
+ * 
+ * @attention Please do not user this command on SSL connection.
+ * 
+ * @note Response
+ * <next segment ID>, < segment ID of which has sent >, < segment ID of which sent successfully>, <remain buffer size>, <queue number> 
+ * OK 
+ * 
+ * If connection is not established, returns ERROR
+*/
+Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
+    _In_ UInt16 linkID
+) {
+    UInt8 send_buf[15] = {0};
 
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPBUFSTATUS%c", linkID, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPBUFSTATUS=%d%c", linkID, CARRIAR_RETURN);
+    }
 
-
-// Multiple connection (+CIPMUX=1) 
-// AT+CIPSENDBUF=<link ID>, <length>
-
-
-
-
-// Single connection (+CIPMUX=0) 
-// AT+CIPBUFSTATUS
-
-
-// Multiple connection (+CIPMUX=1) 
-// AT+CIPBUFSTATUS=<link ID>
-
-
-
-// Single connection (+CIPMUX=0) 
-// AT+CIPCHECKSEQ=<segment ID> 
-
-
-
-// Multiple connection (+CIPMUX=1) 
-// AT+CIPCHECKSEQ=<link ID>, <segment ID>
-
-
-
-// Single connection (+CIPMUX=0) 
-// AT+CIPBUFRESET
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
-// Multiple connection (+CIPMUX=1) 
-// AT+CIPBUFRESET=<link ID>
+/**
+ * @brief Check if specific segment sent successfully or not
+ * 
+ * @param[in] segmentID SegmentID got by AT+CIPSENDBUF command 
+ * @param[in] LinkID    ID of the connection (0~4), for multi-connect 
+ * 
+ * @note 
+ * [<link ID>, ]<segment ID> , <status> 
+ * 
+ * OK 
+ * 
+ * If connection is not established, returns ERROR
+ */
+Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
+    _In_ UInt16 linkID,
+    _In_ UInt16 segmentID
+) {
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPCHECKSEQ=%d%c", segmentID, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPCHECKSEQ=%d, %d%c", linkID, segmentID, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+/**
+ * @brief  Reset segment ID count 
+ * @param[in] linkID ID of the connection (0~4), for multi-connect
+ * 
+ * @note  This command can only be used if AT+CIPSENDBUF  is used
+*/
+Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
+    _In_ UInt16 linkID
+) {
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPCHECKSEQ%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPBUFRESET=%d%c", linkID, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 // Multiple connection AT+CIPCLOSE=<link ID>
@@ -1547,65 +1810,149 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 // or 
 // ERROR
 
-
-
 // Single connection AT+CIPCLOSE
 // Response
 // OK 
 // or 
 // If no such connection, returns 
 // ERROR
+Void __esp8266_Send_AT_CIPCLOSE_cmd(
+    _In_ UInt16 linkID
+) {
+    UInt8 send_buf[15] = {0};
+
+    if (single_connection == 1) {
+        sprintf((Char*)send_buf, "AT+CIPCLOSE%c", CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPCLOSE=%d%c", linkID, CARRIAR_RETURN);
+    }
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
+/**
+ * @brief  Get local IP address 
+ * 
+ * @note  Only after ESP8266 station connected to AP, station IP can be got and inquiried.
+*/
+Void __esp8266_Send_AT_CIFSR_cmd(Void) {
+    UInt8 send_buf[15] = {0};
 
+    sprintf((Char*)send_buf, "AT+CIFSR%c", CARRIAR_RETURN);
 
-// Command AT+ CIFSR
-// Response
-// + CIFSR:<IP address> 
-// OK 
-// ERROR
-
-
-
-
-// Command AT+CIPMUX?
-// Response
-// + CIPMUX:<mode> 
-// OK
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
-// Command AT+CIPMUX=<mode>
-// Response
-// OK 
-// If already connected, returns 
-// Link is builded
+/**
+ * @brief multiple connections is enable or not
+*/
+Void __esp8266_Send_AT_CIFSR_get_cmd(Void) {
+    UInt8 send_buf[15] = {0};
+
+    sprintf((Char*)send_buf, "AT+CIPMUX?%c", CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
+/**
+ * @brief Enable multiple connections 
+ * 
+ * @param[in] mode  
+ * 0  single connection 
+ * 1  multiple connection 
+ * 
+ * @note
+ * 1. "AT+CIPMUX=1" can only be set when transparent transmission disabled ( "AT+CIPMODE=0") 
+ * 2. This mode can only be changed after all connections are disconnected.  
+ * 3. If TCP server is started, has to delete TCP server first, then change to single connection is allowed.
+*/
+Void __esp8266_Send_AT_CIFSR_set_cmd(Bool mode) {
+    UInt8 send_buf[15] = {0};
 
-// Command AT+CIPSERVER=<mode>[, <port>]
+    sprintf((Char*)send_buf, "AT+CIPMUX=%d%c", mode, CARRIAR_RETURN);
+
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
-// Command AT+CIPMODE?
-// + CIPMODE:<mode> 
-// Response
-// OK
+/**
+ * @brief  Configure as TCP server
+ * 
+ * @param[in] mode 
+ * 0  Delete server  
+ * 1  Create server 
+ * @param[in] port port number, default is 333
+ * 
+ * @example  [AT+CIPMUX=1] [AT+CIPSERVER=1, 1001]
+ * 
+ * @note Server can only be created when AT+CIPMUX=1
+*/
+Void __esp8266_Send_AT_CIPSERVER_cmd(Bool mode, UInt16 port) {
+    UInt8 send_buf[15] = {0};
+
+    if (port == 333) {
+        sprintf((Char*)send_buf, "AT+CIPMUX=%d, %d%c", mode, port, CARRIAR_RETURN);
+    }
+    else {
+        sprintf((Char*)send_buf, "AT+CIPMUX=%d%c", mode, CARRIAR_RETURN);
+    }
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
-// Command AT+CIPMODE=<mode>
-// Response
-// OK 
-// If already connected, returns 
-// Link is builded
+/**
+ * @brief  get transfer mode
+ * 
+ * @note This configuration would NOT save into Flash.
+*/
+Void __esp8266_Send_AT_CIPMODE_get_cmd(Void) {
+    UInt8 send_buf[15] = {0};
+
+    sprintf((Char*)send_buf, "AT+CIPMODE?%c", CARRIAR_RETURN);   
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
+/**
+ * @brief  set transfer mode
+ * 
+ * @param[in] mode 
+ * 0  normal mode  
+ * 1  UART-WiFi passthrough mode
+ * 
+ * @attention 
+ * UART-WiFi passthrough mode (transparent transmission) can only be enabled in TCP single connection mode or UDP of which remote IP and port won’t change (parameter <UDP mode> is 0 when using command "AT+CIPSTART" to create a UDP transmission).
+ * During UART-WiFi passthrough transmission, if it is TCP connection and the TCP connection breaks, ESP8266 will keep trying to reconnect until "+++" is inputed to quit from transmission. 
+ * After "+++", please wait at least 1 second before sending next AT command. If it is a normal TCP transmission and TCP connection breaks, ESP8266 will prompt " [<link ID>, ] 
+ * CLOSED" , and won’t try to reconnect. Users can call "AT+CIPSTART" to create a connection again if it’s needed.
+ * 
+ * @note This configuration would NOT save into Flash.
+*/
+Void __esp8266_Send_AT_CIPMODE_get_cmd(Bool mode) {
+    UInt8 send_buf[15] = {0};
+
+    sprintf((Char*)send_buf, "AT+CIPMODE=%d%c", mode, CARRIAR_RETURN);   
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
@@ -1613,36 +1960,145 @@ Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name) {
 
 // For TCP connection: 
 // AT+SAVETRANSLINK =<mode>, <remote IP or domain name>, <remote port>[, <type>][, <TCP keep alive>] 
+/**
+ * @brief Save transparent transmission link to Flash
+ * 
+ * @param[in] mode 
+ *              0 :  normal mode, cancel enter UART-WiFi passthrough mode when power on 
+ *              1 :  save UART-WiFi passthrough mode 
+ * 
+ * @param[in] remote_IP      remote IP or domain name 
+ * @param[in] remote_port    remote port 
+ * 
+ * @param[in] TCP_keep_alive TCP keep alive, default to be disabled 
+ *              0: disable TCP keep alive 
+ *              1 ~ 7200: keep-alive detect time interval, unit: second 
+ * 
+ * @example AT+SAVETRANSLINK=1, "192.168.6.110", 1002, "TCP"
+ * 
+ * @note 
+ * This command will save the UART-WiFi passthrough mode and its link into Flash user parameter area, ESP8266 will enter UART-WiFi passthrough mode since next power on. 
+ * As long as the IP (or domain name), port conformance to specification, we will save them to Flash
+*/
+Void __esp8266_Send_AT_SAVETRANSLINK_TCP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 TCP_keep_alive) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+CIPMODE=%d, \"%s\", %d, \"%s\", %d%c", mode, remoteIP, remote_port, "TCP",TCP_keep_alive, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
+
+
+
+
 // For UDP transmission: 
 // AT+SAVETRANSLINK =<mode>, <remote IP>, <remote port>[, <type>][, <UDP local port>]
+/**
+ * @brief Save transparent transmission link to Flash
+ * 
+ * @param[in] mode 
+ *              0 :  normal mode, cancel enter UART-WiFi passthrough mode when power on 
+ *              1 :  save UART-WiFi passthrough mode 
+ * 
+ * @param[in] remote_IP      remote IP or domain name 
+ * @param[in] remote_port    remote port
+ * 
+ * @param[in] UDP_local_port local port if enter UDP transparent transmission when power on.
+ * 
+ * @note
+ * This command will save the UART-WiFi passthrough mode and its link into Flash user parameter area, ESP8266 will enter UART-WiFi passthrough mode since next power on. 
+ * As long as the IP (or domain name), port conformance to specification, we will save them to Flash
+*/
+Void __esp8266_Send_AT_SAVETRANSLINK_TCP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 UDP_local_port) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+CIPMODE=%d, \"%s\", %d, \"%s\", %d%c", mode, remoteIP, remote_port, "UDP", UDP_local_port, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
 
 // Command AT+CIPSTO?
+Void __esp8266_Send_AT_CIPSTO_get_cmd(Void) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+CIPSTO?%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
 // Command AT+CIPSTO=<time>
+/**
+ * @brief Set TCP server timeout
+ * 
+ * @param time TCP server timeout, range 0~7200 seconds 
+ * 
+ * @note  ESP8266 as TCP server, will disconnect to TCP client that didn’t communicate with it even if timeout. 
+ * If AT+CIPSTO=0, it will never timeout. We don’t recommend that.
+ * 
+*/
+Void __esp8266_Send_AT_CIPSTO_set_cmd(UInt16 time) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+CIPSTO=%d%c", time, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
+/**
+ * @brief Function Ping 
+ * 
+ * @param[in] IP string, host IP or domain name 
+*/
+Void __esp8266_Send_AT_PING_cmd(Char* IP) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+PING=\"%s\"%c", IP, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
-// Command AT+PING=<IP>
 
 
 
-// Command AT+CIUPDATE
+/**
+ * @brief Update through network
+*/
+Void __esp8266_Send_AT_CIUPDATE_cmd(Void) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+CIUPDATE%c", CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
 
-// Command AT+CIPDINFO=<mode>
-
-
+/**
+ * @brief Show remote IP and port with "+IPD"
+ * Show remote IP and port with "+IPD" (received data from network)
+ * 
+ * @param mode 
+ *          0: will not show remote IP and port with "+IPD" 
+ *          1: show remote IP and port with "+IPD"
+*/
+Void __esp8266_Send_AT_CIPDINFO_cmd(Bool mode) {
+    UInt8 send_buf[15] = {0};
+     
+    sprintf((Char*)send_buf, "AT+CIPDINFO=%d%c", mode, CARRIAR_RETURN);
+    
+    esp8266_uart_send(send_buf, strlen(send_buf));
+}
 
 
 
