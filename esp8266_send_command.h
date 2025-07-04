@@ -74,7 +74,7 @@ Void __esp8266_Send_AT_CIPAP_DEF_get_cmd(Void);
 Void __esp8266_Send_AT_CIPSTA_CUR_set_cmd(_In_ Char* IP, _In_ Char* gateway, _In_ Char* netmask);
 Void __esp8266_Send_AT_CIPSTA_DEF_set_cmd(_In_ Char* IP, _In_ Char* gateway, _In_ Char* netmask);
 Void __esp8266_Send_AT_CIPAP_CUR_set_cmd(_In_ Char* IP, _In_ Char* gateway, _In_ Char* netmask);
-Void __esp8266_Send_AT_CIPAP_CUR_set_cmd(_In_ Char* IP, _In_ Char* gateway, _In_ Char* netmask);
+Void __esp8266_Send_AT_CIPAP_DEF_set_cmd(_In_ Char* IP, _In_ Char* gateway, _In_ Char* netmask);
 
 Void __esp8266_Send_AT_CWSTARTSMART_cmd(Void);
 Void __esp8266_Send_AT_CWSTARTSMART_set_cmd(UInt8 type); 
@@ -100,7 +100,7 @@ Void __esp8266_Send_AT_CIPSTART_UDP_cmd(linkID, type, remoteIP, remote_port, UDP
 Void __esp8266_Send_AT_CIPSTART_SSL_cmd(linkID, type, remoteIP, remote_port, TCP_keep_alive);
 
 Void __esp8266_Send_AT_CIPSSLSIZE_cmd(_In_ UInt16 size);
-Void __esp8266_Send_AT_CIPSSLSIZE_cmd(_In_ UInt8  linkID, _In_ UInt16 length);
+Void __esp8266_Send_AT_CIPSEND_cmd(_In_ UInt8  linkID, _In_ UInt16 length);
 
 Void __esp8266_Send_AT_CIPSSLSIZE_UDP_cmd(_In_ UInt8  linkID, _In_ UInt16 length,_In_ Char*  remoteIP, _In_ UInt16 remote_port);
 Void __esp8266_Send_AT_CIPSSLSIZE_TT_MODE_cmd(Void);
@@ -110,8 +110,8 @@ Void __esp8266_Send_AT_CIPSENDEX_UDP_cmd(_In_ UInt8  linkID, _In_ UInt16 length,
 Void __esp8266_Send_AT_CIPSENDBUF_cmd(_In_ UInt8  linkID, _In_ UInt16 length);
 
 Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(_In_ UInt16 linkID);
-Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(_In_ UInt16 linkID,_In_ UInt16 segmentID);
-Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(_In_ UInt16 linkID);
+Void __esp8266_Send_AT_CIPCHECKSEQ_cmd(_In_ UInt16 linkID,_In_ UInt16 segmentID);
+Void __esp8266_Send_AT_CIPBUFRESET_cmd(_In_ UInt16 linkID);
 
 Void __esp8266_Send_AT_CIPCLOSE_cmd(_In_ UInt16 linkID);
 
@@ -124,7 +124,7 @@ Void __esp8266_Send_AT_CIPMODE_get_cmd(Void);
 Void __esp8266_Send_AT_CIPMODE_set_cmd(Bool mode);
 
 Void __esp8266_Send_AT_SAVETRANSLINK_TCP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 TCP_keep_alive); 
-Void __esp8266_Send_AT_SAVETRANSLINK_TCP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 UDP_local_port); 
+Void __esp8266_Send_AT_SAVETRANSLINK_UDP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 UDP_local_port); 
 
 
 

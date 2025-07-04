@@ -4,8 +4,10 @@
 #include "../Common_C/defs.h"
 #include "../Common_C/debug.h"
 
+#include "main.h"
 
 #define ESP8266_PORT &huart2
+
 Void esp8266_uart_send(UInt8* send_buf, size_t len) {
     HAL_UART_Transmit(ESP8266_PORT, send_buf, len, 1000);
 }

@@ -1093,7 +1093,7 @@ Void __esp8266_Send_AT_CIPAP_DEF_get_cmd() {
 
 // Command AT+CIPAP_DEF=<IP>[, <gateway>, <netmask>]
 // Response OK
-Void __esp8266_Send_AT_CIPAP_CUR_set_cmd(
+Void __esp8266_Send_AT_CIPAP_DEF_set_cmd(
     _In_ Char* IP, 
     _In_ Char* gateway, 
     _In_ Char* netmask
@@ -1101,10 +1101,10 @@ Void __esp8266_Send_AT_CIPAP_CUR_set_cmd(
     UInt8 send_buf[15] = {0};
     
     if (gateway != NULL && netmask != NULL) {
-        sprintf((Char*)send_buf, "AT+CIPAP_CUR=%s, %s, %s%c", CARRIAR_RETURN);
+        sprintf((Char*)send_buf, "AT+CIPAP_DEF=%s, %s, %s%c", CARRIAR_RETURN);
     }
     else {
-        sprintf((Char*)send_buf, "AT+CIPAP_CUR=%s%c", CARRIAR_RETURN);
+        sprintf((Char*)send_buf, "AT+CIPAP_DEF=%s%c", CARRIAR_RETURN);
     }
 
     esp8266_uart_send(send_buf, strlen(send_buf));
@@ -1155,9 +1155,9 @@ Void __esp8266_Send_AT_CWSTOPSMART_cmd(Void) {
 // Command AT+CWSTARTDISCOVER=<WeChat number>, <dev_type>, <time>
 // Response OK or ERROR
 Void __esp8266_Send_AT_CWSTOPSMART_set_cmd(
-    _In_ Char*    WeChat_number, 
-    _In_ Char*    dev_type, 
-    _In_ uint32_t time
+    _In_ Char*  WeChat_number, 
+    _In_ Char*  dev_type, 
+    _In_ UInt32 time
 ) {
     UInt8 send_buf[15] = {0};
 
@@ -1381,7 +1381,7 @@ Void __esp8266_Send_AT_CIPSSLSIZE_cmd(
 
 // Multiple connection (+CIPMUX=1) 
 // AT+CIPSEND=<link ID>, <length>
-Void __esp8266_Send_AT_CIPSSLSIZE_cmd(
+Void __esp8266_Send_AT_CIPSEND_cmd(
     _In_ UInt8  linkID, 
     _In_ UInt16 length
 ) {
@@ -1623,7 +1623,7 @@ Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
  * 
  * If connection is not established, returns ERROR
  */
-Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
+Void __esp8266_Send_AT_CIPCHECKSEQ_cmd(
     _In_ UInt16 linkID,
     _In_ UInt16 segmentID
 ) {
@@ -1648,13 +1648,13 @@ Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
  * 
  * @note  This command can only be used if AT+CIPSENDBUF  is used
 */
-Void __esp8266_Send_AT_CIPBUFSTATUS_cmd(
+Void __esp8266_Send_AT_CIPBUFRESET_cmd(
     _In_ UInt16 linkID
 ) {
     UInt8 send_buf[15] = {0};
 
     if (single_connection == 1) {
-        sprintf((Char*)send_buf, "AT+CIPCHECKSEQ%c", CARRIAR_RETURN);
+        sprintf((Char*)send_buf, "AT+CIPBUFRESET%c", CARRIAR_RETURN);
     }
     else {
         sprintf((Char*)send_buf, "AT+CIPBUFRESET=%d%c", linkID, CARRIAR_RETURN);
@@ -1869,7 +1869,7 @@ Void __esp8266_Send_AT_SAVETRANSLINK_TCP_cmd(Bool mode, Char* remoteIP, UInt16 r
  * This command will save the UART-WiFi passthrough mode and its link into Flash user parameter area, ESP8266 will enter UART-WiFi passthrough mode since next power on. 
  * As long as the IP (or domain name), port conformance to specification, we will save them to Flash
 */
-Void __esp8266_Send_AT_SAVETRANSLINK_TCP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 UDP_local_port) {
+Void __esp8266_Send_AT_SAVETRANSLINK_UDP_cmd(Bool mode, Char* remoteIP, UInt16 remote_port, UInt16 UDP_local_port) {
     UInt8 send_buf[15] = {0};
      
     sprintf((Char*)send_buf, "AT+CIPMODE=%d, \"%s\", %d, \"%s\", %d%c", mode, remoteIP, remote_port, "UDP", UDP_local_port, CARRIAR_RETURN);
