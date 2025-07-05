@@ -1,5 +1,5 @@
 #include "esp8266.h"
-
+#include <string.h>
 
 
 Void send_data_parser(Void) {
@@ -137,6 +137,7 @@ Void request_parser(UInt8 receive_byte) {
 //+SLEEP
 //+RFVDD
 // +<time> 
+// +IPD
 typedef enum ESP8266_PLUS_MSG_t {
     WAIT_FOR_PLUS,
     PLUS_RECEIVED,
@@ -146,7 +147,17 @@ typedef enum ESP8266_PLUS_MSG_t {
 
 ESP8266_PLUS_MSG esp8266_plus_msg = WAIT_FOR_PLUS;
 
+UInt8 CW_frame[15]       = {0};
+UInt8 CIP_frame[15]      = {0};
+UInt8 CIUPDATE_frame[15] = {0}; 
+UInt8 CIFSR_frame[15]    = {0};
+UInt8 SLEEP_frame[15]    = {0};
+UInt8 RFVDD_frame[15]    = {0};
+UInt8 time_frame[15]     = {0}; 
+UInt8 IPD_frame[15]      = {0};
+
 UInt8 plus_frame[100] = {0};
+UInt16 rx_byte_counter = 0;
 Void plus_parser(UInt8 receive_byte) {
     switch (esp8266_plus_msg) {
         case WAIT_FOR_PLUS:
@@ -158,19 +169,52 @@ Void plus_parser(UInt8 receive_byte) {
             if (receive_byte == 'C') {
                 esp8266_plus_msg = C_RECEIVED;
             }
-            else if (receive_byte == 'S') {
-                sleep_parser();         //+SLEEP
+            else if (receive_byte == 'S') {                 //+SLEEP
+                SLEEP_frame[rx_byte_counter] = receive_byte;// save sleep frame
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    sleep_parser(SLEEP_frame);             // parse sleep frame
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             else if (receive_byte == 'R') {
-                rf_voltage_parser();    //+RFVDD
+                RFVDD_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    rf_voltage_parser(RFVDD_frame);        //+RFVDD
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
+            }
+            else if (receive_byte == 'I') {
+                IPD_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    ipd_parser(IPD_frame);               // +IPD
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             else {
-                ping_parser();          // +<time> 
+                time_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    ping_parser(time_frame);              // +<time> 
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             break;
         case C_RECEIVED:
             if (receive_byte == 'W') {
-                cw_purser();            //+CW
+                CW_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    cw_purser(CW_frame);            //+CW
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             if (receive_byte == 'I') {
                 esp8266_plus_msg = CI_RECEIVED;
@@ -178,13 +222,31 @@ Void plus_parser(UInt8 receive_byte) {
             break;
         case CI_RECEIVED:
             if (receive_byte == 'P') {
-                cip_parser();           //+CIP
+                CIP_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    cip_parser(CIP_frame);           //+CIP
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             else if (receive_byte == 'U') {
-                update_parser();        //+CIUPDATE:<n> 
+                CIUPDATE_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    update_parser(CIUPDATE_frame);        //+CIUPDATE:<n> 
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             else if (receive_byte == 'F') {
-                ip_address_parser();    //+ CIFSR
+                CIFSR_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    ip_address_parser(CIFSR_frame);    //+ CIFSR
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             }
             break;
         default:
@@ -195,33 +257,33 @@ Void plus_parser(UInt8 receive_byte) {
 
 
 
-Void rf_voltage_parser(Void) {
+Void rf_voltage_parser(UInt8* str) {
     /* [5] */
     // +RFVDD:<VDD33> 
     // OK
 }
 
-Void ip_address_parser(Void) {
+Void ip_address_parser(UInt8* str) {
     /* [37] */
     // + CIFSR:<IP address> 
     // OK 
     // ERROR
 }
 
-Void sleep_parser(Void) {
+Void sleep_parser(UInt8* str) {
     /* [4] */
     // +SLEEP : <sleep mode> 
     // OK
 }
 
 
-Void update_parser(Void) {
+Void update_parser(UInt8* str) {
     /* [43] */
     // +CIUPDATE:<n> 
     // OK
 }
 
-Void ping_parser(Void) {
+Void ping_parser(UInt8* str) {
     /* [42] */
     // +<time> 
     // OK 
@@ -231,7 +293,7 @@ Void ping_parser(Void) {
 
 
 
-Void ipd_parser(Void) {
+Void ipd_parser(UInt8* str) {
     /* [44] */
     // Single connection
     // (+CIPMUX=0) 
@@ -304,7 +366,7 @@ Void cwdhcps_purser(Void) {
 
 
 
-Void cw_purser(Void) {
+Void cw_purser(UInt8* str) {
 
     cwmode_parser();    // +CWMODE
     
@@ -334,7 +396,7 @@ Void cw_purser(Void) {
 // =======================================================================================================================================
 // ============================================================== CIP PARSER ==============================================================
 // =======================================================================================================================================
-Void cipsta_parser(Void) {
+Void cipsta_parser(UInt8* str) {
     /* [21] */
     // +CIPSTAMAC_CUR:<mac> 
     // OK
@@ -352,7 +414,7 @@ Void cipsta_parser(Void) {
     // OK
 }
 
-Void cipap_parser(Void) {
+Void cipap_parser(UInt8* str) {
     /* [23] */
     // +CIPAPMAC_CUR:<mac> 
     // OK
@@ -371,49 +433,57 @@ Void cipap_parser(Void) {
 }
 
 
-Void cip_status_parser(Void) {
+Void cip_status_parser(UInt8* str) {
     /* [29] */
     // STATUS:<stat> 
     // +CIPSTATUS:<link ID>, <type>, <remote_IP>, <remote_port>, <local_port>,  <tetype>
 }
 
 
-Void cipdomain_parser(Void) {
+Void cipdomain_parser(UInt8* str) {
     /* [30] */
     // +CIPDOMAIN:<IP address>
 }
 
-Void cipmux_parser(Void) {
+Void cipmux_parser(UInt8* str) {
     /* [38] */
     // + CIPMUX:<mode> 
     // OK
 }
 
-Void cipmode_parser(Void) {
+Void cipmode_parser(UInt8* str) {
     /* [39] */
     // +CIPMODE:<mode> 
     // OK
 }
 
-Void cipsto_parser(Void) {
+Void cipsto_parser(UInt8* str) {
     /* [41] */
     // + CIPSTO:<time> 
     // OK
 }
 
-Void cip_parser(Void) {
+Void cip_parser(UInt8* str) {
 
-    cipsta_parser();        //+CIPSTA
-
-    cipap_parser();         //+CIPAP
-
-    cip_status_parser();    //+CIPSTATUS
-
-    cipdomain_parser();     // +CIPDOMAIN
-
-    cipmode_parser();       //+CIPMODE
-
-    cipsto_parser();        //+ CIPSTO
+    
+    if (strncmp(str, "PSTA", strlen("PSTA")) == 0) {
+        cipsta_parser(str);        //+CIPSTA
+    }
+    else if (strncmp(str, "PAP", strlen("PAP")) == 0) {
+        cipap_parser(str);         //+CIPAP
+    }
+    else if (strncmp(str, "PSTATUS", strlen("PSTATUS")) == 0) {
+        cip_status_parser(str);    //+CIPSTATUS
+    }    
+    else if (strncmp(str, "PDOMAIN", strlen("PDOMAIN")) == 0) {
+        cipdomain_parser(str);     // +CIPDOMAIN   
+    }    
+    else if (strncmp(str, "PMODE", strlen("PMODE")) == 0) {
+        cipmode_parser(str);       //+CIPMODE
+    }
+    else if (strncmp(str, "PSTO", strlen("PSTO")) == 0) {
+        cipsto_parser(str);        //+ CIPSTO
+    }
 }
 
 
