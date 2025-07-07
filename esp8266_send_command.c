@@ -23,9 +23,11 @@
 /**
  * @addtogroup Basic_at_commands
  * 
+ * @brief The type of this command is "executed". It's used to test the setup function of your wireless WiFi module.
+ * 
  * @typedef Type Execute
  * 
- * 
+ * @result OK
 */
 Void __esp8266_Send_Test_AT_cmd(Void) {
     UInt8 send_buf[15] = {0};
@@ -41,6 +43,9 @@ Void __esp8266_Send_Test_AT_cmd(Void) {
 /**
  * @addtogroup Basic_at_commands
  * 
+ * @brief  Restart module 
+ * The type of this command is "executed". It’s used to restart the module. 
+ * 
 */
 Void __esp8266_Send_AT_RST_cmd(Void) {
     UInt8 send_buf[15] = {0};
@@ -54,6 +59,9 @@ Void __esp8266_Send_AT_RST_cmd(Void) {
 
 /**
  * @addtogroup Basic_at_commands
+ * 
+ * @brief  View version info 
+ * This AT command is used to check the version of AT commands and SDK that you are using, the type of which is "executed".
  * 
 */
 Void __esp8266_Send_AT_GMR_cmd(Void) {
@@ -71,6 +79,10 @@ Void __esp8266_Send_AT_GMR_cmd(Void) {
 /**
  * @addtogroup Basic_at_commands
  * 
+ * @brief Enter deep-sleep mode 
+ * This command is used to invoke the deep-sleep mode of the module, the type of which is "set". 
+ * A minor adjustment has to be made before the module enter this deep sleep mode, i.e., connect XPD_DCDC with EXT_RSTB via 0 ohm resistor. 
+ * 
 */
 Void __esp8266_Send_AT_GSLP_cmd(UInt16 time) {
     UInt8 send_buf[15] = {0};
@@ -85,6 +97,10 @@ Void __esp8266_Send_AT_GSLP_cmd(UInt16 time) {
 // ATE
 /**
  * @addtogroup Basic_at_commands
+ * 
+ * @brief AT commands echo  
+ * This command ATE is an AT trigger command echo. It means that entered commands can be echoed back to the sender when ATE command is used. Two parameters are possible. 
+ * The command returns "OK" in normal cases and "ERROR" when a parameter other than 0 or 1 was specified
  * 
 */
 Void __esp8266_Send_ATE_cmd(
@@ -108,6 +124,12 @@ Void __esp8266_Send_ATE_cmd(
 // AT+RESTORE
 /**
  * @addtogroup Basic_at_commands
+ * 
+ * @brief Factory reset 
+ * This command is used to reset all parameters saved in flash (according to appendix), restore the factory default settings of the module. 
+ * The chip will be restarted when this command is executed. 
+ * 
+ * @note  Restore factory default settings. The chip will restart.
  * 
 */
 Void __esp8266_Send_AT_RESTORE_cmd(Void) {

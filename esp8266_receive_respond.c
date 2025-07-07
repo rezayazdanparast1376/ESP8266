@@ -292,8 +292,19 @@ Void ping_parser(UInt8* str) {
 }
 
 
+typedef struct IPD_PACKET_t {
+    UInt16  len;
+    Char    remoteIP[16];
+    UInt16  remote_port;
+    Char    data[100];
+}IPD_PACKET;
 
-Void ipd_parser(UInt8* str) {
+
+Void ipd_parser(
+    _In_  UInt8*  str, 
+    _Out_ UInt16* len
+) {
+    
     /* [44] */
     // Single connection
     // (+CIPMUX=0) 

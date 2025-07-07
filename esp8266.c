@@ -3,7 +3,7 @@
 #include "esp8266.h"
 #include "../Common_C/defs.h"
 #include "../Common_C/debug.h"
-
+#include "esp8266_send_command.h"
 #include "main.h"
 
 #define ESP8266_PORT &huart2
@@ -15,7 +15,175 @@ Void esp8266_uart_send(UInt8* send_buf, size_t len) {
 
 
 
+Void esp8266_set_deep_sleep_mode(UInt16 time) {
+    __esp8266_Send_AT_GSLP_cmd(time);
+}
+
+
+
+
+Void esp8266_set_echo(Bool echo) {
+    __esp8266_Send_ATE_cmd(echo);
+}
+
+
+
+Void esp8266_set_uart_config(
+    ESP8266_UART_CONF uart_config
+) {
+    if (uart_config.config_state == ESP8266_UART_STATE_CUR) {
+        __esp8266_Send_AT_UART_CUR_cmd(uart_config.boud_rate, uart_config.data_bit, uart_config.stop_bit, uart_config.parity_bit, uart_config.flow_control);
+    }
+    else if(uart_config.config_state == ESP8266_UART_STATE_DEF) {
+        __esp8266_Send_AT_UART_DEF_cmd(uart_config.boud_rate, uart_config.data_bit, uart_config.stop_bit, uart_config.parity_bit, uart_config.flow_control);
+    }
+}
+
+
+Void esp8266_set_sleep_mode(_In_ SLEEP_MODE sleep_mode) {
+    __esp8266_Send_AT_SLEEP_set_cmd(sleep_mode);
+}
+
+Void esp8266_get_sleep_mode(_Out_ SLEEP_MODE* sleep_mode) {
+    __esp8266_Send_AT_SLEEP_req_cmd();
+    // delay_ms(100);
+    //receive sleep mode from irq ...
+}
+
+
+Void esp8266_set_rf_tx_power(UInt16 vdd) {
+    Soft_Assert_Void(vdd >= 1900 && vdd <= 3300, "Invalid parameter for power range! range[1900 ~ 3300]");
+
+    __esp8266_Send_AT_RFVDD_set_cmd(vdd);
+}
+
+
+
+
+Void esp8266_set_rf_tx_power_auto(Void) {
+    __esp8266_Send_AT_RFVDD_req_cmd();
+}
+
+
+
+
+Void esp8266_get_rf_tx_power(Void) {
+    //TODO ...
+    __esp8266_Send_AT_RFVDD_get_cmd();
+    //delay 
+
+    //receive response ...
+}
+
+
+
+Void esp8266_set_wifi_mode(ESP8266_WIFI_CONF wifi_config) {
+    if (wifi_config.config_state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWMODE_CUR_set_cmd(wifi_config.wifi_mode);
+    }
+    else if (wifi_config.config_state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWMODE_DEF_set_cmd(wifi_config.wifi_mode);
+    }
+}
+
+
+
+
+Void esp8266_get_wifi_mode(
+    _Out_ ESP8266_WIFI_MODE*   wifi_mode, 
+    _In_  ESP8266_CONFIG_STATE state
+) {
+    if (state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWMODE_CUR_get_cmd();
+    }
+    else if (state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWMODE_DEF_get_cmd();
+    }
+    // TODO: 
+    // delay 
+    
+    // receive state ...
+}
+
+
+
+
+Void esp8266_connect_to_acsess_point(
+    Char*                ssid, 
+    Char*                pwd, 
+    Char*                bssid, 
+    ESP8266_CONFIG_STATE state
+) {
+    Soft_Assert_Void(ssid != NULL, "Invalid argument! ssid is null.");
+    Soft_Assert_Void(pwd  != NULL, "Invalid argument! pwd is null.");
+
+    if (state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWJAP_CUR_set_cmd(ssid, pwd, bssid);
+    }
+    else if (state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWJAP_DEF_set_cmd(ssid, pwd, bssid);
+    }
+    // TODO: check error code ...
+    // delay
+    // receive respond ...
+}
+
+
+
+Void esp8266_set_cwlap(
+    Bool sort_enable, 
+    Bool ecn,
+    Bool ssid,
+    Bool rssi,
+    Bool mac,
+    Bool ch,
+    Bool freq_offset,
+    Bool freq_calibration
+) {
+    UInt8 mask = (ecn << 0) | (ssid << 1) | (rssi << 2) | (mac << 3) | (ch << 4) | (freq_offset << 5) | (freq_calibration << 6);
+
+    __esp8266_Send_AT_CWLAPOPT_set_cmd(sort_enable, mask);
+}
+
+
+Void esp8266_list_available_acess_point() {
+    __esp8266_Send_AT_CWLAP_get_cmd();
+    // TODO
+    // delay
+    // receive respond
+}
+
+
+Void esp8266_find_acess_point(
+    Char* ssid, 
+    Char* mac, 
+    Char* ch
+) {
+    Soft_Assert_Void(ssid != NULL, "Invalid argument! ssid is NULL.");
+    Soft_Assert_Void(mac != NULL, "Invalid argument! mac is NULL.");
+    __esp8266_Send_AT_CWLAP_set_cmd(ssid, mac, ch);
+    // TODO
+    // delay
+    // receive respond
+}
+
+
+
+
+Void esp8266_disconnect_acsses_point(Void) {
+    __esp8266_Send_AT_CWQAP_cmd();
+}
+
+
+
+
+
+
+/// ====================================================================================
+
 Void init_esp8266(Void) {
+    
+    esp8266_set_echo(False);
 
 }
 
