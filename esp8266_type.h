@@ -85,5 +85,51 @@ typedef struct ESP8266_WIFI_CONF_t {
 
 
 
+typedef struct ESP8266_AP_CONF_t {
+    Char                 ssid[32]; 
+    Char                 pwd[64]; 
+    UInt8                channel_id; 
+    WPA                  wps; 
+    UInt8                max_conn; 
+    Bool                 ssid_headen;
+    ESP8266_CONFIG_STATE state;
+}ESP8266_AP_CONF;
+
+typedef enum WIFI_PROTECTION_ACSESS_t{
+    OPEN = 0,
+    WPA_PSK = 2,
+    WPA2_PSK = 3,
+    WPA_WPA2_PSK = 4
+}WPA;
+
+
+
+
+
+typedef struct ESP8266_DHCP_CONF_t {
+    ESP8266_WIFI_MODE    mode;
+    ESP8266_CONFIG_STATE state;
+    Bool                 en;
+}ESP8266_DHCP_CONF;
+
+
+typedef struct ESP8266_DHCP_IP_CONF_t {
+    Bool     enable;
+    UInt16   leas_time; 
+    Char     start_ip[16]; 
+    Char     end_ip[16];
+    ESP8266_CONFIG_STATE state;
+}ESP8266_DHCP_IP_CONF;
+
+
+
+
+typedef struct ESP8266_STATION_MAC_t {
+    Char                 mac_address[18];
+    ESP8266_CONFIG_STATE state;
+}ESP8266_STATION_MAC;
+
+
+
 
 #endif  //_ESP8266_TYPE_H_

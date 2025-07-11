@@ -8,6 +8,11 @@
 
 #define ESP8266_PORT &huart2
 
+
+
+
+
+
 Void esp8266_uart_send(UInt8* send_buf, size_t len) {
     HAL_UART_Transmit(ESP8266_PORT, send_buf, len, 1000);
 }
@@ -28,6 +33,7 @@ Void esp8266_set_echo(Bool echo) {
 
 
 
+
 Void esp8266_set_uart_config(
     ESP8266_UART_CONF uart_config
 ) {
@@ -40,15 +46,22 @@ Void esp8266_set_uart_config(
 }
 
 
+
+
 Void esp8266_set_sleep_mode(_In_ SLEEP_MODE sleep_mode) {
     __esp8266_Send_AT_SLEEP_set_cmd(sleep_mode);
 }
+
+
+
 
 Void esp8266_get_sleep_mode(_Out_ SLEEP_MODE* sleep_mode) {
     __esp8266_Send_AT_SLEEP_req_cmd();
     // delay_ms(100);
     //receive sleep mode from irq ...
 }
+
+
 
 
 Void esp8266_set_rf_tx_power(UInt16 vdd) {
@@ -74,6 +87,7 @@ Void esp8266_get_rf_tx_power(Void) {
 
     //receive response ...
 }
+
 
 
 
@@ -114,8 +128,8 @@ Void esp8266_connect_to_acsess_point(
     Char*                bssid, 
     ESP8266_CONFIG_STATE state
 ) {
-    Soft_Assert_Void(ssid != NULL, "Invalid argument! ssid is null.");
-    Soft_Assert_Void(pwd  != NULL, "Invalid argument! pwd is null.");
+    Soft_Assert_Void(ssid != NULL, "Invalid argument! ssid is NULL.");
+    Soft_Assert_Void(pwd  != NULL, "Invalid argument! pwd is NULL.");
 
     if (state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CWJAP_CUR_set_cmd(ssid, pwd, bssid);
@@ -127,6 +141,7 @@ Void esp8266_connect_to_acsess_point(
     // delay
     // receive respond ...
 }
+
 
 
 
@@ -146,12 +161,16 @@ Void esp8266_set_cwlap(
 }
 
 
+
+
 Void esp8266_list_available_acess_point() {
     __esp8266_Send_AT_CWLAP_get_cmd();
     // TODO
     // delay
     // receive respond
 }
+
+
 
 
 Void esp8266_find_acess_point(
@@ -175,6 +194,158 @@ Void esp8266_disconnect_acsses_point(Void) {
 }
 
 
+
+
+// <ssid> string, ESP8266 softAP’ SSID   
+// <pwd> string, range: 8 ~ 64 bytes ASCII 
+// <chl>  channel id 
+// <ecn>   
+// 0    OPEN 
+// 2    WPA_PSK 
+// 3    WPA2_PSK 
+// 4    WPA_WPA2_PSK  
+// <max conn>  maximum count of stations that allowed to connect to ESP8266 soft-AP  range: [1, 4] 
+// <ssid hidden>  Broadcast SSID by default 
+// 0   broadcast SSID of ESP8266 soft-AP 
+// 1   do not broadcast SSID of ESP8266 soft-A
+Void esp8266_config_acsess_point(ESP8266_AP_CONF config) {
+    Soft_Assert_Void(config.ssid == NULL, "Invalid argument! ssid is NULL.");
+    Soft_Assert_Void(config.pwd == NULL, "Invalid argument! pwd is NULL.");
+    Soft_Assert_Void(config.max_conn <= 4, "Inavlid argument! range of acssess point connnection: [1, 4] , request connection: %d", config.max_conn);
+    if (config.wps == WPA_PSK) {
+        Soft_Assert_Void(strlen(config.pwd) <= 16, "Inavlid pasword len! - Maximum key length in WEP protection is 16 characters. len: %d", strlen(config.pwd));
+    }
+    else {
+        Soft_Assert_Void(strlen(config.pwd) <= 63, "Inavlid pasword len! - Maximum key length in WEP protection is 63 characters. len: %d", strlen(config.pwd));
+    }
+    
+    
+    if (config.state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWSAP_CUR_set_cmd(config.ssid, config.pwd, config.channel_id, config.wps, config.max_conn, config.ssid_headen);
+    }
+    else if (config.state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWSAP_DEF_set_cmd(config.ssid, config.pwd, config.channel_id, config.wps, config.max_conn, config.ssid_headen);
+    }
+}
+
+
+
+
+Void esp8266_check_config_acsess_point(ESP8266_AP_CONF* config) {
+    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL.");
+
+    if(config->state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWSAP_CUR_get_cmd();
+    }
+    else if (config->state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWSAP_DEF_get_cmd();
+    }
+}
+
+
+
+
+Void esp8266_get_ip_stations(Void) {
+    __esp8266_Send_AT_CWLIF_cmd();
+}
+
+
+
+
+Void esp8266_set_dhcp(ESP8266_DHCP_CONF config) {
+    UInt8 mode = 0;
+    if (config.mode == WIFI_MODE_STATION) {
+        mode = 1;
+    }
+    else if (config.mode == WIFI_MODE_ACSESS_POINT) {
+        mode = 0;
+    }
+    else if (config.mode == WIFI_MODE_STATION_ACSESS_POINT) {
+        mode = 2;
+    }
+    
+    if (config.state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWDHCP_CUR_set_cmd(mode, config.en);
+    }
+    else if (ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWDHCP_DEF_set_cmd(mode, config.en);
+    }
+}
+
+
+
+
+Void esp8266_get_dhcp(ESP8266_DHCP_CONF* config) {
+    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL.");
+
+    if (config->state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWDHCP_CUR_get_cmd();   
+    }
+    else if (config->state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWDHCP_DEF_get_cmd();   
+    }
+}
+
+
+
+
+Void esp8266_set_dhcp_ip_address(ESP8266_DHCP_IP_CONF config) {
+    Soft_Assert_Void((config.leas_time >= 1) && (config.leas_time <= 2880), "Invalid argument! leas time is out of range. range[1, 2880]");
+
+    if (config.state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWDHCPS_CUR_set_cmd(config.enable, config.leas_time, config.start_ip, config.end_ip);
+    }
+    else if (config.state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWDHCPS_DEF_set_cmd(config.enable, config.leas_time, config.start_ip, config.end_ip);
+    }
+}
+
+
+
+
+Void esp8266_get_dhcp_ip_address(ESP8266_DHCP_IP_CONF* config) {
+    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL");
+
+    if (config->state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CWDHCPS_CUR_get_cmd();
+    }
+    else if (config->state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CWDHCPS_DEF_get_cmd();
+    }
+}
+
+
+
+
+Void esp8266_auto_connect_to_acsess_point(Bool enable) {
+    __esp8266_Send_AT_CWAUTOCONN_set_cmd(enable);
+}
+
+
+
+
+Void esp8266_set_mac_address_station(ESP8266_STATION_MAC config) {
+    if (config.state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CIPSTAMAC_CUR_set_cmd(config.mac_address);
+    }
+    else if (config.state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CIPSTAMAC_DEF_set_cmd(config.mac_address);
+    }
+}
+
+
+
+
+Void esp8266_get_mac_address_station(ESP8266_STATION_MAC* config) {
+    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL");
+
+    if (config.state == ESP8266_CONFIG_STATE_CUR) {
+        __esp8266_Send_AT_CIPSTAMAC_CUR_get_cmd();
+    }
+    else if (config.state == ESP8266_CONFIG_STATE_DEF) {
+        __esp8266_Send_AT_CIPSTAMAC_DEF_get_cmd();
+    }
+}
 
 
 
