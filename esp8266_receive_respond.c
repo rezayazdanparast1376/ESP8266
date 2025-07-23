@@ -1,8 +1,24 @@
 #include "esp8266.h"
 #include <string.h>
+#include "esp8266_receive_respond.h"
+#include "debug.h"
 
 
-Void send_data_parser(Void) {
+ESP8266_RESPONCE esp8266_responce = ESP8266_NO_RESPONCE;
+
+
+Bool send_data_flag              = False;
+Bool err_ok_flag                 = False;
+Bool version_flag                = False;
+Bool time_flag                   = False;
+Bool ip_mac_flag                 = False;
+Bool dhcp_flag                   = False;
+Bool connection_flag             = False;
+Bool tcp_send_buffer_status_flag = False;
+Bool specific_tcp_segment_flag   = False;
+
+
+Void send_data_parser(UInt8 receive_byte) {
     /* [32] */
     // ">"
     // ERROR
@@ -21,8 +37,58 @@ Void send_data_parser(Void) {
     // "busy" // ERROR  // <segment ID>, SEND OK    // <link ID>, <segment ID>, SEND OK
 }
 
-    
-Void err_ok_parser(Void) {
+
+
+ESP8266_ERR_OK_MSG err_ok_state = WAIT_FOR_FRAME;
+
+Void err_ok_parser(UInt8 receive_byte) {
+    static UInt8 receiver_counter = 0;
+    switch (err_ok_state) {
+        case WAIT_FOR_FRAME:
+            if (receive_byte == 'O' && receiver_counter == 0) {
+                receiver_counter++;
+                err_ok_state = O_RECEIVED;
+            }
+            else if (receive_byte == 'E' && receiver_counter == 0) {
+                receiver_counter++;         //receiver counter: 1
+                err_ok_state = WAIT_FOR_R;
+            }
+            else {
+                receiver_counter = 0;
+                err_ok_state     = WAIT_FOR_FRAME;
+            }
+            break;
+        case O_RECEIVED:
+            if (receive_byte == 'K' && receiver_counter == 1) {
+                esp8266_responce = ESP8266_OK_RESPONCE;                // OK received ...
+                err_ok_flag      = False;
+                debug_info(&DEBUG_PORT, "[esp8266 parser] receive OK from esp8266.");
+            }
+            err_ok_state     = WAIT_FOR_FRAME;
+            receiver_counter = 0;
+            break;
+            case WAIT_FOR_R:
+            if (receive_byte == 'R' && receiver_counter <= 2) {
+                receiver_counter++;
+            }
+            else if (receive_byte == 'O' && receiver_counter == 3) {
+                receiver_counter ++;
+            }
+            else if (receive_byte == 'R' && receiver_counter == 4) {
+                esp8266_responce = ESP8266_ERROR_RESPONCE;          // ERROR received ...
+                err_ok_flag      = False;
+                debug_info(&DEBUG_PORT, "[esp8266 parser] receive ERROR from esp8266.");
+            }
+            else {
+                err_ok_state     = WAIT_FOR_FRAME;
+                receiver_counter = 0;
+            }
+            break;
+        default:
+            receiver_counter = 0;
+            err_ok_state     = WAIT_FOR_FRAME;
+            break;
+    }
     /* [1] */
     // OK
 
@@ -30,7 +96,18 @@ Void err_ok_parser(Void) {
     // OK or ERROR
 }
 
-Void version_parser(Void) {
+
+
+
+typedef enum ESP8266_VERSION_MSG_t {
+	WATIE_FOR_VERSION_FRAME
+}ESP8266_VERSION_MSG;
+
+
+
+ESP8266_VERSION_MSG version_msg_state = WATIE_FOR_VERSION_FRAME;
+Void version_parser(UInt8 receive_byte) {
+
     /* [2] */
     // <AT version info> 
     // <SDK version info> 
@@ -38,31 +115,31 @@ Void version_parser(Void) {
     // OK
 }
 
-Void time_parser(Void) {
+Void time_parser(UInt8 receive_byte) {
     /* [3] */
     // <time> 
     // OK
 }
 
-Void ip_mac_parser(Void) {   
+Void ip_mac_parser(UInt8 receive_byte) {   
     /* [17] */
     // <IP addr>, <mac> 
     // OK
 }
 
-Void dhcp_parser(Void) {
+Void dhcp_parser(UInt8 receive_byte) {
     /* [18] */
     // DHCP disabled or enabled now? [????]
 }
 
-Void connection_parser(Void) {
+Void connection_parser(UInt8 receive_byte) {
     /* [31] */
     // ALREADY CONNECT
     // OK or ERROR
 }    
 
 
-Void tcp_send_buffer_status_parser(Void) {
+Void tcp_send_buffer_status_parser(UInt8 receive_byte) {
     /* [35] */
     // <next segment ID>, < segment ID of which has sent >, < segment ID of which sent successfully>, <remain buffer size>, <queue number> 
     // OK 
@@ -70,7 +147,7 @@ Void tcp_send_buffer_status_parser(Void) {
     // ERROR
 }
 
-Void specific_tcp_segment_parser() {
+Void specific_tcp_segment_parser(UInt8 receive_byte) {
     /* [36] */
     // [<link ID>, ]<segment ID> , <status> 
     // OK 
@@ -80,51 +157,43 @@ Void specific_tcp_segment_parser() {
 
 
 
-Bool send_data_flag              = 0;
-Bool err_ok_flag                 = 0;
-Bool version_flag                = 0;
-Bool time_flag                   = 0;
-Bool ip_mac_flag                 = 0;
-Bool dhcp_flag                   = 0;
-Bool connection_flag             = 0;
-Bool tcp_send_buffer_status_flag = 0;
-Bool specific_tcp_segment_flag   = 0;
+
 
 Void request_parser(UInt8 receive_byte) {
     if (send_data_flag == 1) {
-        send_data_parser();
+        send_data_parser(receive_byte);
         send_data_flag = 0;
     }
-    if (err_ok_flag == 1) {
-        err_ok_parser();
-        err_ok_flag = 0;
+    if (err_ok_flag == True) {
+        err_ok_parser(receive_byte);
+        // err_ok_flag = 0;
     }
     if (version_flag == 1) {
-        version_parser();
-        version_flag = 0;
+        version_parser(receive_byte);
+        // version_flag = 0;
     }
     if (time_flag == 1) {
-        time_parser();
+        time_parser(receive_byte);
         time_flag = 0;
     }
     if (ip_mac_flag == 1) {
-        ip_mac_parser();
+        ip_mac_parser(receive_byte);
         ip_mac_flag = 0;
     }
     if (dhcp_flag == 1) {
-        dhcp_parser();        
+        dhcp_parser(receive_byte);
         dhcp_flag = 0;
     }
     if (connection_flag == 1) {
-        connection_parser();
+        connection_parser(receive_byte);
         connection_flag = 0;
     }
     if (tcp_send_buffer_status_flag == 1) {
-        tcp_send_buffer_status_parser();
+        tcp_send_buffer_status_parser(receive_byte);
         tcp_send_buffer_status_flag = 0;
     }
     if (specific_tcp_segment_flag == 1) {   
-        specific_tcp_segment_parser();
+        specific_tcp_segment_parser(receive_byte);
         specific_tcp_segment_flag = 0;
     }
 }

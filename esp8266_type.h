@@ -64,12 +64,6 @@ typedef struct ESP8266_UART_CONF_t {
 }ESP8266_UART_CONF;
 
 
-typedef enum SLEEP_MODE_t {
-    DISABLE_SLEEP_MODE = 0, /* 0 : disable sleep mode  */
-    LIGHT_SLEEP_MODE   = 1, /* 1 : light-sleep mode  */
-    MODEM_SLEEP_MODE   = 2  /* 2 : modem-sleep mode */
-}SLEEP_MODE;
-
 
 typedef enum ESP8266_WIFI_MODE_t {
     WIFI_MODE_STATION              = 1,
@@ -83,7 +77,12 @@ typedef struct ESP8266_WIFI_CONF_t {
 }ESP8266_WIFI_CONF;
 
 
-
+typedef enum WIFI_PROTECTION_ACSESS_t{
+    OPEN = 0,
+    WPA_PSK = 2,
+    WPA2_PSK = 3,
+    WPA_WPA2_PSK = 4
+}WPA;
 
 typedef struct ESP8266_AP_CONF_t {
     Char                 ssid[32]; 
@@ -95,12 +94,7 @@ typedef struct ESP8266_AP_CONF_t {
     ESP8266_CONFIG_STATE state;
 }ESP8266_AP_CONF;
 
-typedef enum WIFI_PROTECTION_ACSESS_t{
-    OPEN = 0,
-    WPA_PSK = 2,
-    WPA2_PSK = 3,
-    WPA_WPA2_PSK = 4
-}WPA;
+
 
 
 
@@ -130,6 +124,10 @@ typedef struct ESP8266_STATION_MAC_t {
 }ESP8266_STATION_MAC;
 
 
-
+typedef enum ESP8266_RESPONCE_t {
+    ESP8266_NO_RESPONCE,
+    ESP8266_OK_RESPONCE,
+    ESP8266_ERROR_RESPONCE
+}ESP8266_RESPONCE;
 
 #endif  //_ESP8266_TYPE_H_

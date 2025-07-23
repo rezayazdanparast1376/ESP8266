@@ -27,12 +27,14 @@
  * 
  * @typedef Type Execute
  * 
+ * @test serial was down
+ * 
  * @result OK
 */
 Void __esp8266_Send_Test_AT_cmd(Void) {
     UInt8 send_buf[15] = {0};
 
-    sprintf((Char*)send_buf, "AT%c", CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT%c%c", CARRIAR_RETURN, LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }

@@ -6,17 +6,74 @@
 #include "esp8266_send_command.h"
 #include "main.h"
 
-#define ESP8266_PORT &huart2
+#define ESP8266_PORT &huart3
 
 
+extern Bool send_data_flag;
+extern Bool err_ok_flag;
+extern Bool version_flag;
+extern Bool time_flag;
+extern Bool ip_mac_flag;
+extern Bool dhcp_flag;
+extern Bool connection_flag;
+extern Bool tcp_send_buffer_status_flag;
+extern Bool specific_tcp_segment_flag;
 
-
+extern ESP8266_RESPONCE esp8266_responce;
 
 
 Void esp8266_uart_send(UInt8* send_buf, size_t len) {
     HAL_UART_Transmit(ESP8266_PORT, send_buf, len, 1000);
 }
 
+
+
+
+Void esp8266_delay_ms(UInt16 _delay) {
+    HAL_Delay(_delay);
+}
+
+
+
+
+/**
+ * 
+*/
+Bool esp8266_Test(Void) {
+    __esp8266_Send_Test_AT_cmd();
+    
+    err_ok_flag = True;
+    
+    esp8266_delay_ms(1000);
+    
+    receive_esp8266_data();
+    
+    if (esp8266_responce == ESP8266_OK_RESPONCE) {
+        esp8266_responce = ESP8266_NO_RESPONCE;
+        return True;
+    }
+    
+    return False;
+}
+
+
+
+Bool esp8266_get_version(Void) {
+    __esp8266_Send_AT_GMR_cmd();
+
+    version_flag = True;
+
+    esp8266_delay_ms(1000);
+
+    receive_esp8266_data();
+    
+    if (esp8266_responce == ESP8266_OK_RESPONCE) {
+        esp8266_responce = ESP8266_NO_RESPONCE;
+        return True;
+    }
+    
+    return False;
+}
 
 
 
@@ -37,10 +94,10 @@ Void esp8266_set_echo(Bool echo) {
 Void esp8266_set_uart_config(
     ESP8266_UART_CONF uart_config
 ) {
-    if (uart_config.config_state == ESP8266_UART_STATE_CUR) {
+    if (uart_config.config_state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_UART_CUR_cmd(uart_config.boud_rate, uart_config.data_bit, uart_config.stop_bit, uart_config.parity_bit, uart_config.flow_control);
     }
-    else if(uart_config.config_state == ESP8266_UART_STATE_DEF) {
+    else if(uart_config.config_state == ESP8266_CONFIG_STATE_DEF) {
         __esp8266_Send_AT_UART_DEF_cmd(uart_config.boud_rate, uart_config.data_bit, uart_config.stop_bit, uart_config.parity_bit, uart_config.flow_control);
     }
 }
@@ -211,20 +268,20 @@ Void esp8266_disconnect_acsses_point(Void) {
 Void esp8266_config_acsess_point(ESP8266_AP_CONF config) {
     Soft_Assert_Void(config.ssid == NULL, "Invalid argument! ssid is NULL.");
     Soft_Assert_Void(config.pwd == NULL, "Invalid argument! pwd is NULL.");
-    Soft_Assert_Void(config.max_conn <= 4, "Inavlid argument! range of acssess point connnection: [1, 4] , request connection: %d", config.max_conn);
+//    Soft_Assert_Void(config.max_conn <= 4, "Inavlid argument! range of acssess point connnection: [1, 4] , request connection: %d", config.max_conn);
     if (config.wps == WPA_PSK) {
-        Soft_Assert_Void(strlen(config.pwd) <= 16, "Inavlid pasword len! - Maximum key length in WEP protection is 16 characters. len: %d", strlen(config.pwd));
+//        Soft_Assert_Void(strlen(config.pwd) <= 16, "Inavlid pasword len! - Maximum key length in WEP protection is 16 characters. len: %d", strlen(config.pwd));
     }
     else {
-        Soft_Assert_Void(strlen(config.pwd) <= 63, "Inavlid pasword len! - Maximum key length in WEP protection is 63 characters. len: %d", strlen(config.pwd));
+//        Soft_Assert_Void(strlen(config.pwd) <= 63, "Inavlid pasword len! - Maximum key length in WEP protection is 63 characters. len: %d", strlen(config.pwd));
     }
     
     
     if (config.state == ESP8266_CONFIG_STATE_CUR) {
-        __esp8266_Send_AT_CWSAP_CUR_set_cmd(config.ssid, config.pwd, config.channel_id, config.wps, config.max_conn, config.ssid_headen);
+        __esp8266_Send_AT_CWSAP_CUR_set_cmd(config.ssid, config.pwd, config.channel_id, config.wps, config.max_conn, NULL);//TODO: handel NULL
     }
     else if (config.state == ESP8266_CONFIG_STATE_DEF) {
-        __esp8266_Send_AT_CWSAP_DEF_set_cmd(config.ssid, config.pwd, config.channel_id, config.wps, config.max_conn, config.ssid_headen);
+        __esp8266_Send_AT_CWSAP_DEF_set_cmd(config.ssid, config.pwd, config.channel_id, config.wps, config.max_conn, NULL);// TODO: handel NULL
     }
 }
 
@@ -339,10 +396,10 @@ Void esp8266_set_mac_address_station(ESP8266_STATION_MAC config) {
 Void esp8266_get_mac_address_station(ESP8266_STATION_MAC* config) {
     Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL");
 
-    if (config.state == ESP8266_CONFIG_STATE_CUR) {
+    if (config->state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CIPSTAMAC_CUR_get_cmd();
     }
-    else if (config.state == ESP8266_CONFIG_STATE_DEF) {
+    else if (config->state == ESP8266_CONFIG_STATE_DEF) {
         __esp8266_Send_AT_CIPSTAMAC_DEF_get_cmd();
     }
 }
@@ -356,7 +413,18 @@ Void init_esp8266(Void) {
     
     esp8266_set_echo(False);
 
+    HAL_Delay(1000);
+
+    Bool ret = esp8266_Test();
+    Soft_Assert_Ignore(ret == True, "Communication test of esp8266 was fail!");
+
+    debug_info(&DEBUG_PORT, "Comminucation test of esp8266 was sucsessful.");
+    
+
+    esp8266_get_version();
+
 }
+
 
 
 Void send_esp8266(Void) {

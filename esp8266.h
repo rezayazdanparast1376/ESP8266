@@ -8,6 +8,9 @@
 
 // ESP8266 esp8266 = {0};
 
+Bool esp8266_Test(Void);
+Bool esp8266_get_version(Void);
+
 
 Void esp8266_set_deep_sleep_mode(UInt16 time);
 Void esp8266_set_echo(Bool echo) ;

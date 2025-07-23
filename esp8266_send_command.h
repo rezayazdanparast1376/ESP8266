@@ -92,9 +92,6 @@ Void __esp8266_Send_AT_CIPSTATUS_cmd(Void);
 
 Void __esp8266_Send_AT_CIPDOMAIN_cmd(Char* domain_name);
 
-Bool single_connection = true;
-Bool Multiple_connection = true;
-
 Void __esp8266_Send_AT_CIPSTART_TCP_cmd(linkID, type, remoteIP, remote_port, TCP_keep_alive);
 Void __esp8266_Send_AT_CIPSTART_UDP_cmd(linkID, type, remoteIP, remote_port, UDPlocal_port, UDP_mode);
 Void __esp8266_Send_AT_CIPSTART_SSL_cmd(linkID, type, remoteIP, remote_port, TCP_keep_alive);

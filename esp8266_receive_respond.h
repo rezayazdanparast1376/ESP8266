@@ -1,0 +1,23 @@
+#ifndef _ESP8266_RECEIVE_RESPOND_H_
+#define _ESP8266_RECEIVE_RESPOND_H_
+
+
+
+
+
+
+typedef enum ESP8266_ERR_OK_MSG_t {
+    WAIT_FOR_FRAME,
+    O_RECEIVED,
+    WAIT_FOR_R,
+} ESP8266_ERR_OK_MSG;
+
+
+
+
+
+
+
+
+#endif //_ESP8266_RECEIVE_RESPOND_H_
+
