@@ -22,7 +22,7 @@ extern Bool specific_tcp_segment_flag;
 extern ESP8266_RESPONCE esp8266_responce;
 
 
-Void esp8266_uart_send(UInt8* send_buf, size_t len) {
+Void esp8266_uart_send(const char* send_buf, size_t len) {
     HAL_UART_Transmit(ESP8266_PORT, send_buf, len, 1000);
 }
 
