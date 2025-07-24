@@ -66,6 +66,7 @@ typedef struct ESP8266_UART_CONF_t {
 
 
 typedef enum ESP8266_WIFI_MODE_t {
+    WIFI_MODE_UNKNOWN              = 0,
     WIFI_MODE_STATION              = 1,
     WIFI_MODE_ACSESS_POINT         = 2,
     WIFI_MODE_STATION_ACSESS_POINT = 3,

@@ -396,7 +396,7 @@ Void __esp8266_Send_AT_RFVDD_req_cmd(Void) {
 Void __esp8266_Send_AT_CWMODE_CUR_req_cmd(Void) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWMODE_CUR=?%c", (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWMODE_CUR=?%c%c", (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -411,7 +411,7 @@ Void __esp8266_Send_AT_CWMODE_CUR_req_cmd(Void) {
 Void __esp8266_Send_AT_CWMODE_CUR_get_cmd(Void) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWMODE_CUR?%c", (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWMODE_CUR?%c%c", (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -427,7 +427,7 @@ Void __esp8266_Send_AT_CWMODE_CUR_get_cmd(Void) {
 Void __esp8266_Send_AT_CWMODE_CUR_set_cmd(UInt8 mode) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWMODE_CUR=%c%c", mode, (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWMODE_CUR=%c%c%c", mode, (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -444,7 +444,7 @@ Void __esp8266_Send_AT_CWMODE_CUR_set_cmd(UInt8 mode) {
 Void __esp8266_Send_AT_CWMODE_DEF_req_cmd(Void) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWMODE_DEF=?%c", (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWMODE_DEF=?%c%c", (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -461,7 +461,7 @@ Void __esp8266_Send_AT_CWMODE_DEF_req_cmd(Void) {
 Void __esp8266_Send_AT_CWMODE_DEF_get_cmd(Void) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWMODE_DEF?%c", (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWMODE_DEF?%c%c", (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -475,7 +475,7 @@ Void __esp8266_Send_AT_CWMODE_DEF_get_cmd(Void) {
 Void __esp8266_Send_AT_CWMODE_DEF_set_cmd(UInt8 mode) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWMODE_DEF?%c%c", mode, (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWMODE_DEF?%c%c%c", mode, (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -491,7 +491,7 @@ Void __esp8266_Send_AT_CWMODE_DEF_set_cmd(UInt8 mode) {
 Void __esp8266_Send_AT_CWJAP_CUR_get_cmd(Void) {
     UInt8 send_buf[35] = {0};
 
-    sprintf((Char*)send_buf, "AT+CWJAP_CUR?%c", (Char)CARRIAR_RETURN);
+    sprintf((Char*)send_buf, "AT+CWJAP_CUR?%c%c", (Char)CARRIAR_RETURN, (Char)LINE_FEED);
 
     esp8266_uart_send(send_buf, strlen(send_buf));
 }
@@ -512,10 +512,10 @@ Void __esp8266_Send_AT_CWJAP_CUR_set_cmd(
     UInt8 send_buf[35] = {0};
 
     if (bssid == NULL) {
-        sprintf((Char*)send_buf, "AT+CWJAP_CUR=%s, %s%c", ssid, pwd, (Char)CARRIAR_RETURN);
+        sprintf((Char*)send_buf, "AT+CWJAP_CUR=%s, %s%c%c", ssid, pwd, (Char)CARRIAR_RETURN, (Char)LINE_FEED);
     }
     else {
-        sprintf((Char*)send_buf, "AT+CWJAP_CUR=%s, %s, %s%c", ssid, pwd, bssid, (Char)CARRIAR_RETURN);
+        sprintf((Char*)send_buf, "AT+CWJAP_CUR=%s, %s, %s%c%c", ssid, pwd, bssid, (Char)CARRIAR_RETURN, (Char)LINE_FEED);
     }
 
     esp8266_uart_send(send_buf, strlen(send_buf));

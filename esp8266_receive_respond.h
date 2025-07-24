@@ -35,10 +35,22 @@ typedef enum ESP8266_PLUS_MSG_t {
     WAIT_FOR_PLUS,
     PLUS_RECEIVED,
     C_RECEIVED,
+    CW_RECEIVED,
     CI_RECEIVED
 } ESP8266_PLUS_MSG;
 
+
+typedef enum ESP8266_CW_MSG_t{
+    WAIT_FOR_CW_MSG_FRAME
+}ESP8266_CW_MSG;
+
+
+extern ESP8266_WIFI_MODE __wifi_mode_cur;
+extern ESP8266_WIFI_MODE __wifi_mode_def;
+
+
 Void request_parser(UInt8 receive_byte);
+Void plus_parser(UInt8 receive_byte);
 
 
 

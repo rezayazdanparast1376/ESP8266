@@ -22,7 +22,7 @@ Void sleep_parser(UInt8* str);
 Void update_parser(UInt8* str);
 Void ping_parser(UInt8* str);
 
-Void cw_purser(UInt8* str);
+Void cw_parser(UInt8* str);
 
 Void ipd_parser(_In_  UInt8*  str /* , _Out_ UInt16* len */);
 
@@ -343,17 +343,20 @@ Void plus_parser(UInt8 receive_byte) {
             break;
         case C_RECEIVED:
             if (receive_byte == 'W') {
-                CW_frame[rx_byte_counter] = receive_byte;
-                rx_byte_counter++;
-                if (receive_byte == CARRIAR_RETURN) {
-                    rx_byte_counter = 0;
-                    cw_purser(CW_frame);            //+CW
-                    esp8266_plus_msg = WAIT_FOR_PLUS;
-                }
+                esp8266_plus_msg = CW_RECEIVED;
             }
             if (receive_byte == 'I') {
                 esp8266_plus_msg = CI_RECEIVED;
             }
+            break;
+        case CW_RECEIVED:
+                CW_frame[rx_byte_counter] = receive_byte;
+                rx_byte_counter++;
+                if (receive_byte == CARRIAR_RETURN) {
+                    rx_byte_counter = 0;
+                    cw_parser(CW_frame);            //+CW
+                    esp8266_plus_msg = WAIT_FOR_PLUS;
+                }
             break;
         case CI_RECEIVED:
             if (receive_byte == 'P') {
@@ -450,7 +453,53 @@ Void ipd_parser(_In_  UInt8*  str /* , _Out_ UInt16* len */) {
 // =======================================================================================================================================
 // ============================================================== CW PARSER ==============================================================
 // =======================================================================================================================================
-Void cwmode_parser(Void) {
+ESP8266_WIFI_MODE __wifi_mode_cur = WIFI_MODE_UNKNOWN;
+ESP8266_WIFI_MODE __wifi_mode_def = WIFI_MODE_UNKNOWN;
+Void cwmode_parser(UInt8* str) {
+    if (strncmp((const Char*)str, "MODE_CUR:", strlen("MODE_CUR:")) == 0) {
+        debug_info(&DEBUG_PORT, "1_ CW MODE CUR parser ...");
+        if (*(str + strlen("MODE_CUR:")) == '1') {
+            __wifi_mode_cur = WIFI_MODE_STATION;
+        }
+        else if (*(str + strlen("MODE_CUR:")) == '2') {
+            __wifi_mode_cur = WIFI_MODE_ACSESS_POINT;
+        }
+        else if (*(str + strlen("MODE_CUR:")) == '3') {
+            __wifi_mode_cur = WIFI_MODE_STATION_ACSESS_POINT;
+        }
+        else {
+            __wifi_mode_cur = WIFI_MODE_UNKNOWN;
+        }
+    }
+    else if (strncmp((const Char*)str, "MODE_DEF:", strlen("MODE_DEF:")) == 0) {
+        debug_info(&DEBUG_PORT, "2_ CW MODE DEF parser ...");
+        if (*(str + strlen("MODE_DEF:")) == '1') {
+            __wifi_mode_def = WIFI_MODE_STATION;
+        }
+        else if (*(str + strlen("MODE_DEF:")) == '2') {
+            __wifi_mode_def = WIFI_MODE_ACSESS_POINT;
+        }
+        else if (*(str + strlen("MODE_DEF:")) == '3') {
+            __wifi_mode_def = WIFI_MODE_STATION_ACSESS_POINT;
+        }
+        else {
+            __wifi_mode_def = WIFI_MODE_UNKNOWN;
+        }
+    }
+    else if (strncmp((const Char*)str, "MODE_CUR:(", strlen("MODE_CUR:(")) == 0) {
+        debug_info(&DEBUG_PORT, "3_ CW MODE CUR( parser ...");
+    }
+    else if (strncmp((const Char*)str, "MODE_DEF:(", strlen("MODE_DEF:(")) == 0) {
+        debug_info(&DEBUG_PORT, "4_ CW MODE DEF( parser ...");
+    }
+    else {
+        debug_info(&DEBUG_PORT, "error in cw mode parser!");
+    }
+    
+    
+    
+    
+    
     /* [6] */
     // +CWMODE_CUR:( value scope of <mode>) 
     // OK
@@ -469,7 +518,7 @@ Void cwmode_parser(Void) {
 }
 
 
-Void cwjap_purser(Void) {
+Void cwjap_purser(UInt8* str) {
     /* [10] */
     // +CWJAP_CUR:<ssid>, <bssid>, <channel>, <rssi> 
     // OK
@@ -483,7 +532,7 @@ Void cwjap_purser(Void) {
     // OK
 }
 
-Void cwlap_purser(Void) {
+Void cwlap_purser(UInt8* str) {
     /* [14] */
     // +CWLAP:<ecn>, <ssid>, <rssi>, <mac>, <ch>, <freq offset>, <freq calibration> 
     // OK 
@@ -491,7 +540,7 @@ Void cwlap_purser(Void) {
 }
 
 
-Void cwsap_purser(Void) {
+Void cwsap_purser(UInt8* str) {
     /* [15] */
     // +CWSAP_CUR:<ssid>, <pwd>, <chl>, <ecn>, <max conn>, <ssid hidden>
 
@@ -499,7 +548,7 @@ Void cwsap_purser(Void) {
     // +CWSAP_DEF:<ssid>, <pwd>, <chl>, <ecn>, <max conn>, <ssid hidden>
 }
 
-Void cwdhcps_purser(Void) {
+Void cwdhcps_purser(UInt8* str) {
     /* [19] */
     // +CWDHCPS_CUR=<lease time>, <start IP>, <end IP>
 
@@ -508,18 +557,26 @@ Void cwdhcps_purser(Void) {
 }
 
 
+ESP8266_CW_MSG cw_msg_state = WAIT_FOR_CW_MSG_FRAME;
+Void cw_parser(UInt8* str) {
+    debug_info(&DEBUG_PORT, "cw parser ...");
 
-Void cw_purser(UInt8* str) {
-
-    cwmode_parser();    // +CWMODE
-    
-    cwjap_purser();     // +CWJAP
-    
-    cwlap_purser();     // +CWLAP
-
-    cwsap_purser();     // +CWSAP
-    
-    cwdhcps_purser();   // +CWDHCPS
+    if (strncmp((const Char*)str, "MODE", strlen("MODE")) == 0) {
+        debug_info(&DEBUG_PORT, "CW MODE parser ...");
+        cwmode_parser(str);    // +CWMODE
+    }
+    else if (strncmp((const Char*)str, "JAP", strlen("JAP")) == 0) {
+        cwjap_purser(str);     // +CWJAP
+    }
+    else if (strncmp((const Char*)str, "LAP", strlen("LAP")) == 0) {
+        cwlap_purser(str);     // +CWLAP
+    }
+    else if (strncmp((const Char*)str, "SAP", strlen("SAP")) == 0) {
+        cwsap_purser(str);     // +CWSAP
+    }
+    else if (strncmp((const Char*)str, "DHCPS", strlen("DHCPS")) == 0) {
+        cwdhcps_purser(str);   // +CWDHCPS
+    }
 }
 
 // =========================================================================================================================================

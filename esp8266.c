@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp8266.h"
-#include "../Common_C/defs.h"
+#include "defs.h"
 #include "debug.h"
 #include "esp8266_send_command.h"
 #include "main.h"
+// #include "esp8266_receive_respond.h"
 
 #define ESP8266_PORT &huart3
 
@@ -20,10 +21,11 @@ extern Bool tcp_send_buffer_status_flag;
 extern Bool specific_tcp_segment_flag;
 
 extern ESP8266_RESPONCE esp8266_responce;
-
+extern ESP8266_WIFI_MODE __wifi_mode_cur;
+extern ESP8266_WIFI_MODE __wifi_mode_def;
 
 Void esp8266_uart_send(const char* send_buf, size_t len) {
-    HAL_UART_Transmit(ESP8266_PORT, send_buf, len, 1000);
+    HAL_UART_Transmit(ESP8266_PORT, (uint8_t*)send_buf, len, 1000);
 }
 
 
@@ -122,7 +124,7 @@ Void esp8266_get_sleep_mode(_Out_ SLEEP_MODE* sleep_mode) {
 
 
 Void esp8266_set_rf_tx_power(UInt16 vdd) {
-    Soft_Assert_Void(vdd >= 1900 && vdd <= 3300, "Invalid parameter for power range! range[1900 ~ 3300]");
+    Soft_Assert_Void((vdd >= 1900) && (vdd <= 3300), "Invalid parameter for power range! range[1900 ~ 3300]");
 
     __esp8266_Send_AT_RFVDD_set_cmd(vdd);
 }
@@ -172,8 +174,16 @@ Void esp8266_get_wifi_mode(
     }
     // TODO: 
     // delay 
+    esp8266_delay_ms(1000);
     
-    // receive state ...
+    receive_esp8266_data();
+
+    if (state == ESP8266_CONFIG_STATE_CUR) {
+		*wifi_mode = __wifi_mode_cur;
+    }
+    else {
+        *wifi_mode = __wifi_mode_def;
+    }
 }
 
 
@@ -185,8 +195,8 @@ Void esp8266_connect_to_acsess_point(
     Char*                bssid, 
     ESP8266_CONFIG_STATE state
 ) {
-    Soft_Assert_Void(ssid != NULL, "Invalid argument! ssid is NULL.");
-    Soft_Assert_Void(pwd  != NULL, "Invalid argument! pwd is NULL.");
+    Soft_Assert_Void((ssid != NULL), "Invalid argument! ssid is NULL.");
+    Soft_Assert_Void((pwd != NULL), "Invalid argument! pwd is NULL.");
 
     if (state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CWJAP_CUR_set_cmd(ssid, pwd, bssid);
@@ -235,8 +245,8 @@ Void esp8266_find_acess_point(
     Char* mac, 
     Char* ch
 ) {
-    Soft_Assert_Void(ssid != NULL, "Invalid argument! ssid is NULL.");
-    Soft_Assert_Void(mac != NULL, "Invalid argument! mac is NULL.");
+    Soft_Assert_Void((ssid != NULL), "Invalid argument! ssid is NULL.");
+    Soft_Assert_Void((mac != NULL), "Invalid argument! mac is NULL.");
     __esp8266_Send_AT_CWLAP_set_cmd(ssid, mac, ch);
     // TODO
     // delay
@@ -266,8 +276,8 @@ Void esp8266_disconnect_acsses_point(Void) {
 // 0   broadcast SSID of ESP8266 soft-AP 
 // 1   do not broadcast SSID of ESP8266 soft-A
 Void esp8266_config_acsess_point(ESP8266_AP_CONF config) {
-    Soft_Assert_Void(config.ssid == NULL, "Invalid argument! ssid is NULL.");
-    Soft_Assert_Void(config.pwd == NULL, "Invalid argument! pwd is NULL.");
+    Soft_Assert_Void((config.ssid == NULL), "Invalid argument! ssid is NULL.");
+    Soft_Assert_Void((config.pwd == NULL), "Invalid argument! pwd is NULL.");
 //    Soft_Assert_Void(config.max_conn <= 4, "Inavlid argument! range of acssess point connnection: [1, 4] , request connection: %d", config.max_conn);
     if (config.wps == WPA_PSK) {
 //        Soft_Assert_Void(strlen(config.pwd) <= 16, "Inavlid pasword len! - Maximum key length in WEP protection is 16 characters. len: %d", strlen(config.pwd));
@@ -289,7 +299,7 @@ Void esp8266_config_acsess_point(ESP8266_AP_CONF config) {
 
 
 Void esp8266_check_config_acsess_point(ESP8266_AP_CONF* config) {
-    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL.");
+    Soft_Assert_Void((config != NULL), "Invalid argument! config parameter is NULL.");
 
     if(config->state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CWSAP_CUR_get_cmd();
@@ -333,7 +343,7 @@ Void esp8266_set_dhcp(ESP8266_DHCP_CONF config) {
 
 
 Void esp8266_get_dhcp(ESP8266_DHCP_CONF* config) {
-    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL.");
+    Soft_Assert_Void((config != NULL), "Invalid argument! config parameter is NULL.");
 
     if (config->state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CWDHCP_CUR_get_cmd();   
@@ -361,7 +371,7 @@ Void esp8266_set_dhcp_ip_address(ESP8266_DHCP_IP_CONF config) {
 
 
 Void esp8266_get_dhcp_ip_address(ESP8266_DHCP_IP_CONF* config) {
-    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL");
+    Soft_Assert_Void((config != NULL), "Invalid argument! config parameter is NULL");
 
     if (config->state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CWDHCPS_CUR_get_cmd();
@@ -394,7 +404,7 @@ Void esp8266_set_mac_address_station(ESP8266_STATION_MAC config) {
 
 
 Void esp8266_get_mac_address_station(ESP8266_STATION_MAC* config) {
-    Soft_Assert_Void(config != NULL, "Invalid argument! config parameter is NULL");
+    Soft_Assert_Void((config != NULL), "Invalid argument! config parameter is NULL");
 
     if (config->state == ESP8266_CONFIG_STATE_CUR) {
         __esp8266_Send_AT_CIPSTAMAC_CUR_get_cmd();
@@ -408,6 +418,7 @@ Void esp8266_get_mac_address_station(ESP8266_STATION_MAC* config) {
 
 
 /// ====================================================================================
+    ESP8266_WIFI_MODE   wifi_mode; 
 
 Void init_esp8266(Void) {
     
@@ -426,6 +437,31 @@ Void init_esp8266(Void) {
     Soft_Assert_Ignore(ret == True, "Cannot get version information of esp8266!");
 
     debug_info(&DEBUG_PORT, "get F.W version of esp8266  was sucsessful.");
+
+    
+    debug_info(&DEBUG_PORT, "get wifi mode ...");
+    esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_CUR);
+    Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find current wifi mode!");
+    // debug_info(&DEBUG_PORT, "wifi mode: %d", wifi_mode);
+
+    esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_DEF);
+    Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find default wifi mode!");
+
+    ESP8266_WIFI_CONF wifi_config = {0};
+    
+    wifi_config.config_state = ESP8266_CONFIG_STATE_CUR;
+    wifi_config.wifi_mode    = WIFI_MODE_STATION_ACSESS_POINT;
+    esp8266_set_wifi_mode(wifi_config);
+    wifi_config.config_state = ESP8266_CONFIG_STATE_DEF;
+    esp8266_set_wifi_mode(wifi_config);
+
+    esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_CUR);
+    Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find current wifi mode!");
+
+    esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_DEF);
+    Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find default wifi mode!");
+
+
 }
 
 
