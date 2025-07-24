@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include "esp8266.h"
 #include "../Common_C/defs.h"
-#include "../Common_C/debug.h"
+#include "debug.h"
 #include "esp8266_send_command.h"
 #include "main.h"
 
@@ -411,6 +411,7 @@ Void esp8266_get_mac_address_station(ESP8266_STATION_MAC* config) {
 
 Void init_esp8266(Void) {
     
+    debug_info(&DEBUG_PORT, "Config echo massage ...");
     esp8266_set_echo(False);
 
     HAL_Delay(1000);
@@ -420,9 +421,11 @@ Void init_esp8266(Void) {
 
     debug_info(&DEBUG_PORT, "Comminucation test of esp8266 was sucsessful.");
     
+    debug_info(&DEBUG_PORT, "Get verson of esp8266 ...");
+    ret = esp8266_get_version();
+    Soft_Assert_Ignore(ret == True, "Cannot get version information of esp8266!");
 
-    esp8266_get_version();
-
+    debug_info(&DEBUG_PORT, "get F.W version of esp8266  was sucsessful.");
 }
 
 

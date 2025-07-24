@@ -2,7 +2,29 @@
 #include <string.h>
 #include "esp8266_receive_respond.h"
 #include "debug.h"
+#include "defs.h"
 
+
+Void cipsta_parser(UInt8* str);
+Void cipap_parser(UInt8* str);
+Void cip_status_parser(UInt8* str);
+Void cipdomain_parser(UInt8* str);
+Void cipmux_parser(UInt8* str);
+Void cipmode_parser(UInt8* str);
+Void cipsto_parser(UInt8* str);
+Void cip_parser(UInt8* str);
+
+
+
+Void rf_voltage_parser(UInt8* str);
+Void ip_address_parser(UInt8* str);
+Void sleep_parser(UInt8* str);
+Void update_parser(UInt8* str);
+Void ping_parser(UInt8* str);
+
+Void cw_purser(UInt8* str);
+
+Void ipd_parser(_In_  UInt8*  str /* , _Out_ UInt16* len */);
 
 ESP8266_RESPONCE esp8266_responce = ESP8266_NO_RESPONCE;
 
@@ -99,14 +121,70 @@ Void err_ok_parser(UInt8 receive_byte) {
 
 
 
-typedef enum ESP8266_VERSION_MSG_t {
-	WATIE_FOR_VERSION_FRAME
-}ESP8266_VERSION_MSG;
 
 
 
+Char __at_version[35]   = {0};
+Char __sdk_version[35]  = {0};
+Char __compile_time[35] = {0};
 ESP8266_VERSION_MSG version_msg_state = WATIE_FOR_VERSION_FRAME;
 Void version_parser(UInt8 receive_byte) {
+    static UInt8 receiver_counter = 0;
+    switch (version_msg_state) {
+        case WATIE_FOR_VERSION_FRAME:
+            if (receive_byte == 'A')        version_msg_state = WATIE_FOR_AT_VERSION;
+            else if (receive_byte == 'S')   version_msg_state = WATIE_FOR_SDK_VERSION;
+            else if (receive_byte == 'c')   version_msg_state = WATIE_FOR_COMPILE_TIME;
+            break;
+        case WATIE_FOR_AT_VERSION:
+            if (receive_byte == ':')    version_msg_state = SAVE_AT_VERSION;
+            break;
+        case WATIE_FOR_SDK_VERSION:
+            if (receive_byte == ':')    version_msg_state = SAVE_SKD_VERSON;           
+            break;
+        case WATIE_FOR_COMPILE_TIME:
+            if (receive_byte == ':')    version_msg_state = SAVE_COMPILE_TIME;
+            break;
+        case SAVE_AT_VERSION:
+            if (receive_byte == '\n' || receive_byte == '\r') {
+                receiver_counter  = 0;
+                version_msg_state = WATIE_FOR_VERSION_FRAME;
+            }
+            else {
+                __at_version[receiver_counter] = receive_byte;      //save data ...
+                receiver_counter++;
+            }
+            break;
+        case SAVE_SKD_VERSON:
+            if (receive_byte == '\n' || receive_byte == '\r') {
+                receiver_counter  = 0;
+                version_msg_state = WATIE_FOR_VERSION_FRAME;
+            }
+            else {
+                __sdk_version[receiver_counter] = receive_byte;     //save data ...
+                receiver_counter++;
+            }
+            break;
+        case SAVE_COMPILE_TIME:
+            if (receive_byte == '\n' || receive_byte == '\r') {
+                receiver_counter  = 0;
+                version_msg_state = WATIE_FOR_VERSION_FRAME;
+            }
+            else {
+                __compile_time[receiver_counter] = receive_byte;    //save data ...
+                receiver_counter++;
+            }
+            break;
+        default:
+            break;
+    }
+
+
+    // AT version:1.7.4.0(Jul  8 2020 15:53:04)
+    // SDK version:3.0.5-dev(52383f9)
+    // compile time:Aug 28 2020 14:37:33
+    // OK
+
 
     /* [2] */
     // <AT version info> 
@@ -160,7 +238,7 @@ Void specific_tcp_segment_parser(UInt8 receive_byte) {
 
 
 Void request_parser(UInt8 receive_byte) {
-    if (send_data_flag == 1) {
+    if (send_data_flag == True) {
         send_data_parser(receive_byte);
         send_data_flag = 0;
     }
@@ -168,51 +246,39 @@ Void request_parser(UInt8 receive_byte) {
         err_ok_parser(receive_byte);
         // err_ok_flag = 0;
     }
-    if (version_flag == 1) {
+    if (version_flag == True) {
+        // debug_info(&DEBUG_PORT, "version parser ...");
         version_parser(receive_byte);
         // version_flag = 0;
     }
-    if (time_flag == 1) {
+    if (time_flag == True) {
         time_parser(receive_byte);
         time_flag = 0;
     }
-    if (ip_mac_flag == 1) {
+    if (ip_mac_flag == True) {
         ip_mac_parser(receive_byte);
         ip_mac_flag = 0;
     }
-    if (dhcp_flag == 1) {
+    if (dhcp_flag == True) {
         dhcp_parser(receive_byte);
         dhcp_flag = 0;
     }
-    if (connection_flag == 1) {
+    if (connection_flag == True) {
         connection_parser(receive_byte);
         connection_flag = 0;
     }
-    if (tcp_send_buffer_status_flag == 1) {
+    if (tcp_send_buffer_status_flag == True) {
         tcp_send_buffer_status_parser(receive_byte);
         tcp_send_buffer_status_flag = 0;
     }
-    if (specific_tcp_segment_flag == 1) {   
+    if (specific_tcp_segment_flag == True) {   
         specific_tcp_segment_parser(receive_byte);
         specific_tcp_segment_flag = 0;
     }
 }
 
 
-//+CW
-//+CIP
-//+CIUPDATE:<n> 
-//+ CIFSR
-//+SLEEP
-//+RFVDD
-// +<time> 
-// +IPD
-typedef enum ESP8266_PLUS_MSG_t {
-    WAIT_FOR_PLUS,
-    PLUS_RECEIVED,
-    C_RECEIVED,
-    CI_RECEIVED
-} ESP8266_PLUS_MSG;
+
 
 ESP8266_PLUS_MSG esp8266_plus_msg = WAIT_FOR_PLUS;
 
@@ -369,10 +435,7 @@ typedef struct IPD_PACKET_t {
 }IPD_PACKET;
 
 
-Void ipd_parser(
-    _In_  UInt8*  str, 
-    _Out_ UInt16* len
-) {
+Void ipd_parser(_In_  UInt8*  str /* , _Out_ UInt16* len */) {
     
     /* [44] */
     // Single connection
@@ -476,6 +539,10 @@ Void cw_purser(UInt8* str) {
 // =======================================================================================================================================
 // ============================================================== CIP PARSER ==============================================================
 // =======================================================================================================================================
+
+
+
+
 Void cipsta_parser(UInt8* str) {
     /* [21] */
     // +CIPSTAMAC_CUR:<mac> 
@@ -546,22 +613,22 @@ Void cipsto_parser(UInt8* str) {
 Void cip_parser(UInt8* str) {
 
     
-    if (strncmp(str, "PSTA", strlen("PSTA")) == 0) {
+    if (strncmp((const char*)str, "PSTA", strlen("PSTA")) == 0) {
         cipsta_parser(str);        //+CIPSTA
     }
-    else if (strncmp(str, "PAP", strlen("PAP")) == 0) {
+    else if (strncmp((const Char*)str, "PAP", strlen("PAP")) == 0) {
         cipap_parser(str);         //+CIPAP
     }
-    else if (strncmp(str, "PSTATUS", strlen("PSTATUS")) == 0) {
+    else if (strncmp((const char*)str, "PSTATUS", strlen("PSTATUS")) == 0) {
         cip_status_parser(str);    //+CIPSTATUS
     }    
-    else if (strncmp(str, "PDOMAIN", strlen("PDOMAIN")) == 0) {
+    else if (strncmp((const char*)str, "PDOMAIN", strlen("PDOMAIN")) == 0) {
         cipdomain_parser(str);     // +CIPDOMAIN   
     }    
-    else if (strncmp(str, "PMODE", strlen("PMODE")) == 0) {
+    else if (strncmp((const char*)str, "PMODE", strlen("PMODE")) == 0) {
         cipmode_parser(str);       //+CIPMODE
     }
-    else if (strncmp(str, "PSTO", strlen("PSTO")) == 0) {
+    else if (strncmp((const char*)str, "PSTO", strlen("PSTO")) == 0) {
         cipsto_parser(str);        //+ CIPSTO
     }
 }

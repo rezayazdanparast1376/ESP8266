@@ -13,7 +13,32 @@ typedef enum ESP8266_ERR_OK_MSG_t {
 } ESP8266_ERR_OK_MSG;
 
 
+typedef enum ESP8266_VERSION_MSG_t {
+	WATIE_FOR_VERSION_FRAME,    /* version frame */
+	WATIE_FOR_AT_VERSION,       /* AT version */
+	WATIE_FOR_SDK_VERSION,      /* SDK version*/
+	WATIE_FOR_COMPILE_TIME,     /* compile time */
+    SAVE_AT_VERSION,
+    SAVE_SKD_VERSON,
+    SAVE_COMPILE_TIME
+}ESP8266_VERSION_MSG;
 
+//+CW
+//+CIP
+//+CIUPDATE:<n> 
+//+ CIFSR
+//+SLEEP
+//+RFVDD
+// +<time> 
+// +IPD
+typedef enum ESP8266_PLUS_MSG_t {
+    WAIT_FOR_PLUS,
+    PLUS_RECEIVED,
+    C_RECEIVED,
+    CI_RECEIVED
+} ESP8266_PLUS_MSG;
+
+Void request_parser(UInt8 receive_byte);
 
 
 
