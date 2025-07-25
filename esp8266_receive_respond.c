@@ -84,7 +84,7 @@ Void err_ok_parser(UInt8 receive_byte) {
             if (receive_byte == 'K' && receiver_counter == 1) {
                 esp8266_responce = ESP8266_OK_RESPONCE;                // OK received ...
                 err_ok_flag      = False;
-                debug_info(&DEBUG_PORT, "[esp8266 parser] receive OK from esp8266.");
+                // debug_info(&DEBUG_PORT, "[esp8266 parser] receive OK from esp8266.");
             }
             err_ok_state     = WAIT_FOR_FRAME;
             receiver_counter = 0;
@@ -457,7 +457,7 @@ ESP8266_WIFI_MODE __wifi_mode_cur = WIFI_MODE_UNKNOWN;
 ESP8266_WIFI_MODE __wifi_mode_def = WIFI_MODE_UNKNOWN;
 Void cwmode_parser(UInt8* str) {
     if (strncmp((const Char*)str, "MODE_CUR:", strlen("MODE_CUR:")) == 0) {
-        debug_info(&DEBUG_PORT, "1_ CW MODE CUR parser ...");
+        // debug_info(&DEBUG_PORT, "1_ CW MODE CUR parser ...");
         if (*(str + strlen("MODE_CUR:")) == '1') {
             __wifi_mode_cur = WIFI_MODE_STATION;
         }
@@ -472,7 +472,7 @@ Void cwmode_parser(UInt8* str) {
         }
     }
     else if (strncmp((const Char*)str, "MODE_DEF:", strlen("MODE_DEF:")) == 0) {
-        debug_info(&DEBUG_PORT, "2_ CW MODE DEF parser ...");
+        // debug_info(&DEBUG_PORT, "2_ CW MODE DEF parser ...");
         if (*(str + strlen("MODE_DEF:")) == '1') {
             __wifi_mode_def = WIFI_MODE_STATION;
         }
@@ -559,10 +559,10 @@ Void cwdhcps_purser(UInt8* str) {
 
 ESP8266_CW_MSG cw_msg_state = WAIT_FOR_CW_MSG_FRAME;
 Void cw_parser(UInt8* str) {
-    debug_info(&DEBUG_PORT, "cw parser ...");
+    // debug_info(&DEBUG_PORT, "cw parser ...");
 
     if (strncmp((const Char*)str, "MODE", strlen("MODE")) == 0) {
-        debug_info(&DEBUG_PORT, "CW MODE parser ...");
+        // debug_info(&DEBUG_PORT, "CW MODE parser ...");
         cwmode_parser(str);    // +CWMODE
     }
     else if (strncmp((const Char*)str, "JAP", strlen("JAP")) == 0) {

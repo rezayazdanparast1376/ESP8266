@@ -204,6 +204,11 @@ Void esp8266_connect_to_acsess_point(
     else if (state == ESP8266_CONFIG_STATE_DEF) {
         __esp8266_Send_AT_CWJAP_DEF_set_cmd(ssid, pwd, bssid);
     }
+
+    esp8266_delay_ms(100);
+    
+    receive_esp8266_data();
+
     // TODO: check error code ...
     // delay
     // receive respond ...
@@ -442,26 +447,32 @@ Void init_esp8266(Void) {
     debug_info(&DEBUG_PORT, "get wifi mode ...");
     esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_CUR);
     Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find current wifi mode!");
-    // debug_info(&DEBUG_PORT, "wifi mode: %d", wifi_mode);
+    _printf("current wifi mode: %d\n", wifi_mode);
 
     esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_DEF);
     Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find default wifi mode!");
+    _printf("default wifi mode: %d\n", wifi_mode);
 
     ESP8266_WIFI_CONF wifi_config = {0};
     
+    debug_info(&DEBUG_PORT, "set wifi mode ...");
     wifi_config.config_state = ESP8266_CONFIG_STATE_CUR;
     wifi_config.wifi_mode    = WIFI_MODE_STATION_ACSESS_POINT;
     esp8266_set_wifi_mode(wifi_config);
     wifi_config.config_state = ESP8266_CONFIG_STATE_DEF;
     esp8266_set_wifi_mode(wifi_config);
 
+    
     esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_CUR);
     Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find current wifi mode!");
+    _printf("current wifi mode: %d\n", wifi_mode);
 
     esp8266_get_wifi_mode(&wifi_mode, ESP8266_CONFIG_STATE_DEF);
     Soft_Assert_Void(wifi_mode != WIFI_MODE_UNKNOWN, "Cannot find default wifi mode!");
+    _printf("default wifi mode: %d\n", wifi_mode);
 
-
+    
+    esp8266_connect_to_acsess_point("TP-LINK_E6AC9A", "1234", NULL, ESP8266_CONFIG_STATE_CUR);
 }
 
 
